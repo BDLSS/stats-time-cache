@@ -1,0 +1,2 @@
+This folder contains the data from Piwik as exported from
+the existing database.
