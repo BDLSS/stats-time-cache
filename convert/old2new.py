@@ -23,7 +23,7 @@ class Converter(object):
     def _process_file_with_function(self, filepath, function, limit=None):
         '''Process the lines in contained in filepath with function.'''
         if not limit: # Enable part processing of file
-            limit = 1000000000
+            limit = 10000
         logging.info('Processing file: %s'%filepath)
         logging.info('Using function: %s'%function)
         logging.info('Number of lines limited to: %s'%limit)
@@ -70,8 +70,8 @@ class Converter(object):
         function = self.ACTIONS.process_line
         self._process_file_with_function(filepath, function)
         self.ACTIONS.report()
-        outfile = os.path.join(self.DIR_NEW, '%s.tsv'%self.FILE_ACTIONS) 
-        self.ACTIONS.save(outfile)
+        outfile = os.path.join(self.DIR_NEW, self.FILE_ACTIONS) 
+        self.save_converted(self.ACTIONS, outfile)
     
     def process_links(self):
         logging.info('Processing links.')
@@ -80,9 +80,18 @@ class Converter(object):
         self.LINKS.enable_action_lookup(self.ACTIONS.CODES)
         self._process_file_with_function(filepath, function)
         self.LINKS.report()
-        outfile = os.path.join(self.DIR_NEW, '%s.tsv'%self.FILE_LINKS) 
-        self.LINKS.save(outfile)
+        outfile = os.path.join(self.DIR_NEW, self.FILE_LINKS) 
+        self.save_converted(self.LINKS, outfile)
 
+    def save_converted(self, data_source, filepath):
+        '''Save the contents of data source to file path.'''
+        logging.info('Saving converted file to: %s'%filepath)
+        outfile = open(filepath, 'wb')
+        for data in data_source.DATA:
+            line = "\t".join(data)
+            outfile.write('%s\n'%line)
+        outfile.close()
+        
     def run_all(self):
         logging.debug(self.DIR_OLD)
         logging.debug(self.DIR_NEW)
@@ -116,8 +125,10 @@ class Actions(object):
         logging.info('Codes extracted: %s'%self.CODES_FOUND)
         logging.info('Lines without codes %s:'%self.LINES_WITHOUT_CODES)
         
-    def save(self, filepath):
-        logging.info('Saving actions to: %s'%filepath)
+    def pickle_codes(self, filepath):
+        # Pickle codes so to speed up test runs.
+        pickle_filepath = '%s.pickle'%filepath
+        logging.info('Pickling codes to: %s'%pickle_filepath)
 
 class Links(object):
     '''Process data from table: log_link_visit_action '''
@@ -184,10 +195,6 @@ class Links(object):
             logging.warn("Input lines with unexpected counts: %s"%lenfau)
             for line in self.LINE_LEN_FAULTS:
                 logging.debug(line)
-                
-    
-    def save(self, filepath):
-        logging.info('Saving actions to: %s'%filepath)
             
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
