@@ -20,6 +20,7 @@ class Converter(object):
         #The classes that will do the conversion when called.
         self.ACTIONS = Actions()
         self.LINKS = Links()
+        self.VISITS = Visits()
 
     def _process_file_with_function(self, filepath, function, limit=None):
         '''Process the lines in contained in filepath with function.'''
@@ -95,6 +96,14 @@ class Converter(object):
         outfile = os.path.join(self.DIR_NEW, self.FILE_LINKS) 
         self.save_converted(self.LINKS, outfile)
 
+    def process_visits(self):
+        logging.info('Processing visits')
+        filepath = os.path.join(self.DIR_OLD, self.FILE_VISITS)
+        function = self.VISITS.process_line
+        self._process_file_with_function(filepath, function)
+        outfile = os.path.join(self.DIR_NEW, self.FILE_VISITS) 
+        self.save_converted(self.VISITS, outfile)
+        
     def save_converted(self, data_source, filepath):
         '''Save the contents of data source to file path.'''
         logging.info('Saving converted file to: %s'%filepath)
@@ -109,6 +118,7 @@ class Converter(object):
         logging.debug(self.DIR_NEW)
         self.process_actions()
         self.process_links()
+        self.process_visits()
         
 class Actions(object):
     def __init__(self):
@@ -207,6 +217,16 @@ class Links(object):
             logging.warn("Input lines with unexpected counts: %s"%lenfau)
             for line in self.LINE_LEN_FAULTS:
                 logging.debug(line)
+
+class Visits(object):
+    '''Process data from table: log_visit '''
+    def __init__(self):
+        self.DATA = list() # Converted data.       
+            
+    def process_line(self, line):
+        #Find the custom variable and insert into current line
+        self.DATA.append(line)
+        return True
             
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
