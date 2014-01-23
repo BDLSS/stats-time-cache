@@ -21,7 +21,7 @@ class Converter(object):
     def _process_file_with_function(self, filepath, function, limit=None):
         '''Process the lines in contained in filepath with function.'''
         if not limit: # Enable part processing of file
-            limit = 1000
+            limit = 50
         logging.info('Processing file: %s'%filepath)
         logging.info('Using function: %s'%function)
         logging.info('Number of lines limited to: %s'%limit)
@@ -119,15 +119,34 @@ class Links(object):
     def __init__(self):
         self.DATA = list()
         
+    def look_up_code(self, code):
+        return 'LOOK'+code
+        
     def process_line(self, line):
-        #process line and save results
-        #self.DATA.append(line)
+        #Find the custom variable and insert into current line
+        action_id = line[5]
+        custom_var_code = 11
+        line[custom_var_code] = self.look_up_code(action_id)
+        
+        # Add new columns required into the current line.
+        # Field names come from table: piwik_log_link_visit_action 
+        index_idaction_name_ref = 8 
+        # Need to insert after the above field.
+        insert_index = index_idaction_name_ref+1
+        # Enable human check before and after the insert
+        logging.debug(line[index_idaction_name_ref:])
+        line.insert(insert_index, 'ACTNULL') #idaction_event_action 
+        line.insert(insert_index, 'CATNULL') #idaction_event_category
+        logging.debug(line[index_idaction_name_ref:])
+        # Note idaction_event_category ends up before the other.
+        
+        self.DATA.append(line)
         return True
     
     def save(self, filepath):
         logging.info('Saving actions to: %s'%filepath)
             
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     c = Converter()
     c.run_all()
