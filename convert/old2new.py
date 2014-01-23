@@ -15,13 +15,15 @@ class Converter(object):
         self.FILE_LINKS = 'links.tsv'
         self.FILE_VISITS = 'visits.tsv'
         self.DELIMITER = "\t"
+
+        #The classes that will do the conversion when called.
         self.ACTIONS = Actions()
         self.LINKS = Links()
 
     def _process_file_with_function(self, filepath, function, limit=None):
         '''Process the lines in contained in filepath with function.'''
         if not limit: # Enable part processing of file
-            limit = 50
+            limit = 100
         logging.info('Processing file: %s'%filepath)
         logging.info('Using function: %s'%function)
         logging.info('Number of lines limited to: %s'%limit)
@@ -75,7 +77,9 @@ class Converter(object):
         logging.info('Processing links.')
         filepath = os.path.join(self.DIR_OLD, self.FILE_LINKS)
         function = self.LINKS.process_line
+        self.LINKS.enable_action_lookup(self.ACTIONS.CODES)
         self._process_file_with_function(filepath, function)
+        self.LINKS.report()
         outfile = os.path.join(self.DIR_NEW, '%s.tsv'%self.FILE_LINKS) 
         self.LINKS.save(outfile)
 
@@ -116,12 +120,24 @@ class Actions(object):
         logging.info('Saving actions to: %s'%filepath)
 
 class Links(object):
+    '''Process data from table: log_link_visit_action '''
     def __init__(self):
-        self.DATA = list()
+        self.LOOKUP_CODES = dict() # Used to find codes when enabled.
+        self.DATA = list() # Converted data.
+        
+    def enable_action_lookup(self, codes):
+        '''Dictionary of actions to lookup codes to insert.'''
+        self.LOOKUP_CODES = codes
         
     def look_up_code(self, code):
-        return 'LOOK'+code
-        
+        '''Find the code for this action or'''
+        if not self.LOOKUP_CODES:
+            return 'CODE>>%s<<CODE'%code
+        try:
+            return 'LOOKUP>%s<LOOKUP'%self.LOOKUP_CODES[code]
+        except KeyError:
+            return 'nc' #no code
+    
     def process_line(self, line):
         #Find the custom variable and insert into current line
         action_id = line[5]
@@ -142,6 +158,14 @@ class Links(object):
         
         self.DATA.append(line)
         return True
+    
+    def report(self):
+        if self.LOOKUP_CODES:
+            logging.info('Code lookup was enabled.')
+            nc = 'Number of codes available for lookup: %s'%len(self.LOOKUP_CODES)
+            logging.info(nc)
+        else:
+            logging.critical('Code lookup disabled, test codes where used.')
     
     def save(self, filepath):
         logging.info('Saving actions to: %s'%filepath)
