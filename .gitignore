@@ -35,5 +35,6 @@ nosetests.xml
 .project
 .pydevproject
 
-# Stop exported TSV files showing.
-*.txt
+# Stop exported TSV and pickle files showing.
+*.tsv
+*.pickle
