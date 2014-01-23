@@ -4,6 +4,7 @@ import os
 import logging
 import csv
 import re #To detect UUIDs in urls
+import pickle
 
 class Converter(object):
     '''Control the conversion process.'''
@@ -23,7 +24,7 @@ class Converter(object):
     def _process_file_with_function(self, filepath, function, limit=None):
         '''Process the lines in contained in filepath with function.'''
         if not limit: # Enable part processing of file
-            limit = 10000
+            limit = 2000000
         logging.info('Processing file: %s'%filepath)
         logging.info('Using function: %s'%function)
         logging.info('Number of lines limited to: %s'%limit)
@@ -66,12 +67,23 @@ class Converter(object):
         
     def process_actions(self):
         logging.info('Processing actions.')
+        # Setup file paths
         filepath = os.path.join(self.DIR_OLD, self.FILE_ACTIONS)
-        function = self.ACTIONS.process_line
-        self._process_file_with_function(filepath, function)
-        self.ACTIONS.report()
-        outfile = os.path.join(self.DIR_NEW, self.FILE_ACTIONS) 
-        self.save_converted(self.ACTIONS, outfile)
+        outfile = os.path.join(self.DIR_NEW, self.FILE_ACTIONS)
+        pickfile = os.path.join(self.DIR_NEW, '%s.pickle'%self.FILE_ACTIONS)
+        
+        # Process the actions or use the cached codes instead.
+        if os.path.exists(pickfile):
+            logging.critical('Using pickled codes rather then regenerating.')
+            logging.critical('Saved conversion will NOT be updated.')
+            self.ACTIONS.CODES = pickle.load(open(pickfile, 'rb'))
+        else:            
+            # Process the actions.
+            function = self.ACTIONS.process_line
+            self._process_file_with_function(filepath, function)
+            self.ACTIONS.report() 
+            self.save_converted(self.ACTIONS, outfile)
+            self.ACTIONS.pickle_codes(pickfile)
     
     def process_links(self):
         logging.info('Processing links.')
@@ -127,8 +139,8 @@ class Actions(object):
         
     def pickle_codes(self, filepath):
         # Pickle codes so to speed up test runs.
-        pickle_filepath = '%s.pickle'%filepath
-        logging.info('Pickling codes to: %s'%pickle_filepath)
+        logging.info('Pickling codes to: %s'%filepath)
+        pickle.dump(self.CODES, open(filepath, 'wb'))
 
 class Links(object):
     '''Process data from table: log_link_visit_action '''
