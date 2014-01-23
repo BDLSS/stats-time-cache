@@ -93,6 +93,18 @@ class Actions(object):
         self.LINES_WITHOUT_CODES = 0
         
     def process_line(self, line):
+        self.DATA.append(line)
+        link_lookup_id = line[0] #key field referenced from links
+        check = line[1] #field that contains code for custom vars
+        regexp = '(.*)(uuid:[0-F]{8}-[0-F]{4}-[0-F]{4}-[0-F]{4}-[0-F]{12})(.*)'
+        pattern = re.compile(regexp, re.IGNORECASE)
+        found = re.search(pattern, check)
+        if not found:
+            self.LINES_WITHOUT_CODES += 1
+        else:
+            self.CODES_FOUND += 1
+            code = str(found.group(2)).lower()
+            self.CODES[link_lookup_id] = code
         return True
     
     def report(self):
