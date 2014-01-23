@@ -135,8 +135,8 @@ class Links(object):
         insert_index = index_idaction_name_ref+1
         # Enable human check before and after the insert
         logging.debug(line[index_idaction_name_ref:])
-        line.insert(insert_index, 'ACTNULL') #idaction_event_action 
-        line.insert(insert_index, 'CATNULL') #idaction_event_category
+        line.insert(insert_index, 'NULL') #idaction_event_action 
+        line.insert(insert_index, 'NULL') #idaction_event_category
         logging.debug(line[index_idaction_name_ref:])
         # Note idaction_event_category ends up before the other.
         
