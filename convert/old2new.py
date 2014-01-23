@@ -124,6 +124,8 @@ class Links(object):
     def __init__(self):
         self.LOOKUP_CODES = dict() # Used to find codes when enabled.
         self.DATA = list() # Converted data.
+        self.LINE_LEN_EXPECTED = 20 # number of expected fields
+        self.LINE_LEN_FAULTS = list() # store faulty lines for checking
         
     def enable_action_lookup(self, codes):
         '''Dictionary of actions to lookup codes to insert.'''
@@ -138,9 +140,19 @@ class Links(object):
         except KeyError:
             return 'nc' #no code
     
+    def get_id(self, line):
+        '''Check line matches expected patterns.'''
+        if len(line) <> self.LINE_LEN_EXPECTED:
+            self.LINE_LEN_FAULTS.append(line)
+            return False
+        else:
+            return line[5] #don't put this in a try block
+            
     def process_line(self, line):
         #Find the custom variable and insert into current line
-        action_id = line[5]
+        action_id = self.get_id(line)
+        if not action_id:
+            return False
         custom_var_code = 11
         line[custom_var_code] = self.look_up_code(action_id)
         
@@ -162,10 +174,17 @@ class Links(object):
     def report(self):
         if self.LOOKUP_CODES:
             logging.info('Code lookup was enabled.')
-            nc = 'Number of codes available for lookup: %s'%len(self.LOOKUP_CODES)
+            nc = 'Number of codes available for lookup was: %s'%len(self.LOOKUP_CODES)
             logging.info(nc)
         else:
-            logging.critical('Code lookup disabled, test codes where used.')
+            logging.critical('Code lookup disabled, TEST codes used.')
+        
+        lenfau = len(self.LINE_LEN_FAULTS)
+        if lenfau:
+            logging.warn("Input lines with unexpected counts: %s"%lenfau)
+            for line in self.LINE_LEN_FAULTS:
+                logging.debug(line)
+                
     
     def save(self, filepath):
         logging.info('Saving actions to: %s'%filepath)
