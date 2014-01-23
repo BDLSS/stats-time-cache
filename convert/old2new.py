@@ -23,7 +23,7 @@ class Converter(object):
     def _process_file_with_function(self, filepath, function, limit=None):
         '''Process the lines in contained in filepath with function.'''
         if not limit: # Enable part processing of file
-            limit = 100
+            limit = 1000000000
         logging.info('Processing file: %s'%filepath)
         logging.info('Using function: %s'%function)
         logging.info('Number of lines limited to: %s'%limit)
@@ -134,7 +134,7 @@ class Links(object):
         if not self.LOOKUP_CODES:
             return 'CODE>>%s<<CODE'%code
         try:
-            return 'LOOKUP>%s<LOOKUP'%self.LOOKUP_CODES[code]
+            return '%s'%self.LOOKUP_CODES[code]
         except KeyError:
             return 'nc' #no code
     
@@ -171,6 +171,6 @@ class Links(object):
         logging.info('Saving actions to: %s'%filepath)
             
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     c = Converter()
     c.run_all()
