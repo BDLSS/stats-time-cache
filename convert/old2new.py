@@ -318,19 +318,22 @@ class Visits(object):
     def process_line(self, line):
         '''Process a line representing a visit.'''
         # There are 4 existing fields that need moving and 1 new one.
-        before = line[:] # take a copy to compare since we alter line
-        content = line[:6]
-        location = 44
-        content.append(line.pop(location)) # visitor_days_since_last
-        content.append(line.pop(location)) # visitor_days_since_order
-        content.append(line.pop(location)) # visitor_days_since_first
-        content.extend(line[6:14])
-        content.append('NEW visit_total_events')
-        content.extend(line[14:63])
-        content.append(line.pop(43)) # location_provider
-        self.compare(before, content)
-        self.DATA.append(content)
-        return True
+        try:
+            before = line[:] # take a copy to compare since we alter line
+            content = line[:6]
+            location = 44
+            content.append(line.pop(location)) # visitor_days_since_last
+            content.append(line.pop(location)) # visitor_days_since_order
+            content.append(line.pop(location)) # visitor_days_since_first
+            content.extend(line[6:14])
+            content.append('NEW visit_total_events')
+            content.extend(line[14:63])
+            content.append(line.pop(43)) # location_provider
+            self.compare(before, content)
+            self.DATA.append(content)
+            return True
+        except IndexError:
+            return False
             
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
