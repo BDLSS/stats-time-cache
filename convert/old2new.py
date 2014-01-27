@@ -246,6 +246,17 @@ class Visits(object):
                   (47,57,48,60,1), # one field gets moved here after 10 custom fields
                   )
         
+        # A second check occurs that does not require the
+        # above slices to be correct. It looks for exact
+        # values of certain list indexes before and after
+        # the conversion. The easiest to spot visually is
+        # the location provider the others are often 0.
+        self.CHECK_MOVES = ((43,58, 'location_provider'), # ac.uk
+                 (44,6, 'visitor_days_since_last'), # 0
+                 (45,7, 'visitor_days_since_order'), # 0
+                 (46,8, 'visitor_days_since_first'), # 0
+                 )
+        
     def enable_compare(self, header):
         '''List of fields to use when comparing lines.'''
         self.FIELDS = header
@@ -282,6 +293,17 @@ class Visits(object):
                 issues.append('slice=%s'%str(s))
                 issues.append('before=%s'%before)
                 issues.append('after=%s'%after)
+        
+        # Confirm movement is as expected without using slices. The
+        # values taken from before and after the move should match.
+        for move in self.CHECK_MOVES:
+            m_before = line[move[0]]
+            m_after = content[move[1]]
+            if m_before <> m_after:
+                field = move[2]
+                logging.debug('Moving mis-match for field: %s'%field)
+                logging.debug('%s before=%s'%(field, m_before))
+                logging.debug('%s after=%s'%(field, m_after))
                 
         # Confirm the whole line is okay or provide feedback for issues.
         if issues: 
@@ -299,13 +321,13 @@ class Visits(object):
         before = line[:] # take a copy to compare since we alter line
         content = line[:6]
         location = 44
-        content.append('MOVElast='+line.pop(location))
+        content.append(line.pop(location))
         content.append('MOVEorder='+line.pop(location))
         content.append('MOVEfirst='+line.pop(location))
         content.extend(line[6:14])
         content.append('NEW visit_total_events')
         content.extend(line[14:63])
-        content.append('MOVEprovider='+line.pop(43))
+        content.append(line.pop(43)) # location_provider
         self.compare(before, content)
         self.DATA.append(content)
         return True
