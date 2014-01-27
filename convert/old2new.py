@@ -21,8 +21,9 @@ class Converter(object):
         self.ACTIONS = Actions()
         self.LINKS = Links()
         self.VISITS = Visits()
-
-    def _process_file_with_function(self, filepath, function, limit=None):
+        
+    def _process_file_with_function(self, filepath, function,
+                                    limit=None, headstore=None):
         '''Process the lines in contained in filepath with function.'''
         if not limit: # Enable part processing of file
             limit = 2000000
@@ -36,7 +37,8 @@ class Converter(object):
             #lines = csv.DictReader(infile, delimiter=self.DELIMITER)
             lines = csv.reader(infile, delimiter=self.DELIMITER)
             header = lines.next() # assume data has a header row
-            logging.debug('Header: %s'%header)
+            if headstore:
+                headstore(header)
             # Cannot use "for line in lines:" because of binary output
             # in column 2 raises an error. Wrapping it in a try block
             # stops processing of further lines. Hence this:
@@ -98,9 +100,10 @@ class Converter(object):
 
     def process_visits(self):
         logging.info('Processing visits')
-        filepath = os.path.join(self.DIR_OLD, self.FILE_VISITS)
-        function = self.VISITS.process_line
-        self._process_file_with_function(filepath, function)
+        fpath = os.path.join(self.DIR_OLD, self.FILE_VISITS)
+        fun = self.VISITS.process_line
+        hstore = self.VISITS.enable_compare
+        self._process_file_with_function(fpath, fun, headstore=hstore)
         outfile = os.path.join(self.DIR_NEW, self.FILE_VISITS) 
         self.save_converted(self.VISITS, outfile)
         
@@ -222,13 +225,32 @@ class Visits(object):
     '''Process data from table: log_visit '''
     def __init__(self):
         self.DATA = list() # Converted data.       
-            
+    
+    def enable_compare(self, header):
+        '''List of fields to use when comparing lines.'''
+        self.FIELDS = header
+        
+    def compare(self, line, content):
+        '''Compare line before to the content after.'''
+        print self.FIELDS
+        #logging.debug('Header: %s'%)
+        print line
+        print content
+                
     def process_line(self, line):
-        #Find the custom variable and insert into current line
-        self.DATA.append(line)
+        '''Process a line representing a visit.'''
+        # There are 4 existing fields that need moving and 1 new one.
+        content = line[:6] #check
+        content.append('MOVE HERE visitor_days_since_last')
+        content.append('MOVE HERE visitor_days_since_order')
+        content.append('MOVE HERE visitor_days_since_first')
+        content.extend(line[6:15]) #check
+        
+        self.compare(line, content)
+        self.DATA.append(content)
         return True
             
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     c = Converter()
     c.run_all()
