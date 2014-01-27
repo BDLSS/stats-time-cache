@@ -26,7 +26,7 @@ class Converter(object):
                                     limit=None, headstore=None):
         '''Process the lines in contained in filepath with function.'''
         if not limit: # Enable part processing of file
-            limit = 2000000
+            limit = 5
         logging.info('Processing file: %s'%filepath)
         logging.info('Using function: %s'%function)
         logging.info('Number of lines limited to: %s'%limit)
@@ -224,29 +224,89 @@ class Links(object):
 class Visits(object):
     '''Process data from table: log_visit '''
     def __init__(self):
-        self.DATA = list() # Converted data.       
-    
+        self.DATA = list() # Converted data.
+        
+        # The table log_visit has a lot of fields, so to confirm
+        # conversion is okay slices are used. This splits a visit
+        # into a number of chunks so a visual check is easier when
+        # comparing before and after.  Given the number of visits
+        # this visual check is not possible on every one. To enable
+        # this the check on each chunk can vary. If the result does
+        # not match expected patterns it logs the this.
+        self.SLICES = (#(bmin, bmax, amin, amax, check)
+                  (0,6,0,9,3), # three fields get moved here
+                  (6,10,9,13,'='), # starts with 2 action times
+                  (10,14,13,17,'='), # contains 4 visit numbers
+                  (14,17,17,21,1), # a new field appears here
+                  (17,21,21,25,'='), # contains 4 referrer fields
+                  (21,25,25,29,'='), # contains 4 config fields
+                  (25,36,29,40,'='), # starts with config screen res
+                  (36,43,40,47,'='), # contains 7 location fields
+                  (43,47,47,47,'none'), # four field are moved from here 
+                  (47,57,48,60,1), # one field gets moved here after 10 custom fields
+                  )
+        
     def enable_compare(self, header):
         '''List of fields to use when comparing lines.'''
         self.FIELDS = header
         
     def compare(self, line, content):
-        '''Compare line before to the content after.'''
-        print self.FIELDS
-        #logging.debug('Header: %s'%)
-        print line
-        print content
+        '''Compare line before to the content after to confirm okay.'''
+        logging.debug('Comparing visits before and after conversion. '+'=='*25)
+        logging.debug('All fields: %s'%self.FIELDS) 
+        
+        issues = [] # save issues with this line for debug
+        for s in self.SLICES:
+            # Setup before slice and output fields header
+            bmin = s[0]
+            bmax = s[1]
+            logging.debug('Fields: %s'%self.FIELDS[bmin:bmax])
+            
+            # Extract output for slices before and after conversion
+            before = line[bmin:bmax]
+            lenB = len(before)
+            logging.debug('Before: %s'%before)
+            after =  content[s[2]:s[3]]  
+            lenA = len(after)
+            logging.debug('After: %s'%after)
+            
+            # Confirm the output matches expected values or save issues 
+            check = s[4] # vary the check depending expected results
+            if check == '=': # no change
+                okay = lenB == lenA
+            elif check == 'none': # removals
+                okay = lenA == 0
+            else: # additions
+                okay = lenB+check == lenA
+            if not okay:
+                issues.append('slice=%s'%str(s))
+                issues.append('before=%s'%before)
+                issues.append('after=%s'%after)
                 
+        # Confirm the whole line is okay or provide feedback for issues.
+        if issues: 
+            logging.warn('Check idvisit: %s'%line[0])
+            logging.info('Number of issues found: %s'%(len(issues)/3))
+            for issue in issues:
+                logging.debug(issue)
+            return False
+        else:
+            return True
+         
     def process_line(self, line):
         '''Process a line representing a visit.'''
         # There are 4 existing fields that need moving and 1 new one.
-        content = line[:6] #check
-        content.append('MOVE HERE visitor_days_since_last')
-        content.append('MOVE HERE visitor_days_since_order')
-        content.append('MOVE HERE visitor_days_since_first')
-        content.extend(line[6:15]) #check
-        
-        self.compare(line, content)
+        before = line[:] # take a copy to compare since we alter line
+        content = line[:6]
+        location = 44
+        content.append('MOVElast='+line.pop(location))
+        content.append('MOVEorder='+line.pop(location))
+        content.append('MOVEfirst='+line.pop(location))
+        content.extend(line[6:14])
+        content.append('NEW visit_total_events')
+        content.extend(line[14:63])
+        content.append('MOVEprovider='+line.pop(43))
+        self.compare(before, content)
         self.DATA.append(content)
         return True
             
