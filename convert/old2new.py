@@ -26,7 +26,7 @@ class Converter(object):
                                     limit=None, headstore=None):
         '''Process the lines in contained in filepath with function.'''
         if not limit: # Enable part processing of file
-            limit = 5
+            limit = 2000000
         logging.info('Processing file: %s'%filepath)
         logging.info('Using function: %s'%function)
         logging.info('Number of lines limited to: %s'%limit)
@@ -321,9 +321,9 @@ class Visits(object):
         before = line[:] # take a copy to compare since we alter line
         content = line[:6]
         location = 44
-        content.append(line.pop(location))
-        content.append('MOVEorder='+line.pop(location))
-        content.append('MOVEfirst='+line.pop(location))
+        content.append(line.pop(location)) # visitor_days_since_last
+        content.append(line.pop(location)) # visitor_days_since_order
+        content.append(line.pop(location)) # visitor_days_since_first
         content.extend(line[6:14])
         content.append('NEW visit_total_events')
         content.extend(line[14:63])
@@ -333,6 +333,6 @@ class Visits(object):
         return True
             
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     c = Converter()
     c.run_all()
