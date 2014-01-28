@@ -9,9 +9,6 @@ import pickle
 # If the logging level is set to debug, it is possible
 # to enable large quantities of output whilst the data is being
 # converted rather than just using that provided by reports afterwards.
-#
-# If both True, report length ~1.7GB
-# If both False, report length ~415MB
 DETAILED_DEBUG_LINKS = False
 DETAILED_DEBUG_VISITS = False
 
@@ -280,8 +277,9 @@ class Visits(object):
         
     def compare(self, line, content):
         '''Compare line before to the content after to confirm okay.'''
-        logging.debug('Comparing visits before and after conversion. '+'=='*25)
-        logging.debug('All fields: %s'%self.FIELDS) 
+        if DETAILED_DEBUG_VISITS:
+            logging.debug('Comparing visits before and after conversion. '+'=='*25)
+            logging.debug('All fields: %s'%self.FIELDS) 
         
         issues = [] # save issues with this line for debug
         for s in self.SLICES:
