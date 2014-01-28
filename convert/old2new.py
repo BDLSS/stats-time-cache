@@ -5,9 +5,7 @@ import logging
 import csv
 import re #To detect UUIDs in urls
 import pickle
-# Alternative ways of creating file objects for read and write.
-#import io
-#import codecs
+import codecs
 
 # If the logging level is set to debug, it is possible
 # to enable large quantities of output whilst the data is being
@@ -43,19 +41,9 @@ class Converter(object):
         failed = 0 # attempts at conversion that failed
         skipped = 0 # lines that caused CSV errors
         
-        # Start processing the file using 1 of 4 methods.
-        with open(filepath, 'rb') as infile:
-        
-        # At cursory glance, the next 2 options produce the same results as
-        # the first. Also checked files are binary using "file -i filename"    
-        #with codecs.open(filepath, 'rb') as infile:
-        #with io.open(filepath, 'rb') as infile:
-        
-        # This next option seems to dramatically increase line
-        # processing issues. The suggestion of which encoding to use
-        # came from opening the original file in Kate text editor.
-        #with codecs.open(filepath, 'rb', 'iso8859_15') as infile:
-
+        # The suggestion of which encoding to use came from 
+        # opening the original file in Kate text editor.
+        with codecs.open(filepath, 'rb', 'iso8859_15') as infile:
             #Start processing the file.
             lines = csv.reader(infile, delimiter=self.DELIMITER)
             header = lines.next() # assume data has a header row
