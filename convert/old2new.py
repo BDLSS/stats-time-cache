@@ -154,6 +154,8 @@ class Actions(object):
         try:
             link_lookup_id = line[0] #key field referenced from links
             check = line[1] #field that contains code for custom vars
+            if not check: # Mismatch report showed 1 line had no data. 
+                raise IndexError # entry 266841 with type code 8
         except IndexError:
             self.LINE_ISSUES.append('link: %s'%line)
             check = None
