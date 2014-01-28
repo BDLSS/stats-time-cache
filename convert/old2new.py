@@ -6,6 +6,15 @@ import csv
 import re #To detect UUIDs in urls
 import pickle
 
+# If the logging level is set to debug, it is possible
+# to enable large quantities of output whilst the data is being
+# converted rather than just using that provided by reports afterwards.
+#
+# If both True, report length ~1.7GB
+# If both False, report length ~415MB
+DETAILED_DEBUG_LINKS = False
+DETAILED_DEBUG_VISITS = False
+
 class Converter(object):
     '''Control the conversion process.'''
     def __init__(self):
@@ -199,10 +208,12 @@ class Links(object):
         # Need to insert after the above field.
         insert_index = index_idaction_name_ref+1
         # Enable human check before and after the insert
-        logging.debug(line[index_idaction_name_ref:])
+        if DETAILED_DEBUG_LINKS:
+            logging.debug('before=%s'%line[index_idaction_name_ref:])
         line.insert(insert_index, 'NULL') #idaction_event_action 
         line.insert(insert_index, 'NULL') #idaction_event_category
-        logging.debug(line[index_idaction_name_ref:])
+        if DETAILED_DEBUG_LINKS:
+            logging.debug('after=%s'%line[index_idaction_name_ref:])
         # Note idaction_event_category ends up before the other.
         
         self.DATA.append(line)
@@ -274,18 +285,17 @@ class Visits(object):
         
         issues = [] # save issues with this line for debug
         for s in self.SLICES:
-            # Setup before slice and output fields header
+            # Extract output for slices before and after conversion
             bmin = s[0]
             bmax = s[1]
-            logging.debug('Fields: %s'%self.FIELDS[bmin:bmax])
-            
-            # Extract output for slices before and after conversion
             before = line[bmin:bmax]
             lenB = len(before)
-            logging.debug('Before: %s'%before)
             after =  content[s[2]:s[3]]  
             lenA = len(after)
-            logging.debug('After: %s'%after)
+            if DETAILED_DEBUG_VISITS:
+                logging.debug('Fields: %s'%self.FIELDS[bmin:bmax])
+                logging.debug('Before: %s'%before)
+                logging.debug('After: %s'%after)
             
             # Confirm the output matches expected values or save issues 
             check = s[4] # vary the check depending expected results
