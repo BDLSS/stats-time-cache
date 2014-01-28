@@ -143,28 +143,55 @@ class Actions(object):
         regexp = '(.*)(uuid:[0-F]{8}-[0-F]{4}-[0-F]{4}-[0-F]{4}-[0-F]{12})(.*)'
         self.PATTERN = re.compile(regexp, re.IGNORECASE)
         
+        # Store a report of issues while processing lines.
+        self.LINE_ISSUES = list()
+        
+        # Internal counter used to check results.
+        self.COUNT_PROCESSED = 0
+        
     def process_line(self, line):
         self.DATA.append(line)
-        link_lookup_id = line[0] #key field referenced from links
-        check = line[1] #field that contains code for custom vars
+        try:
+            link_lookup_id = line[0] #key field referenced from links
+            check = line[1] #field that contains code for custom vars
+        except IndexError:
+            self.LINE_ISSUES.append('link: %s'%line)
+            check = None
         
-        found = re.search(self.PATTERN, check)
-        if not found:
-            self.LINES_WITHOUT_CODES += 1
-        else:
-            self.CODES_FOUND += 1
-            code = str(found.group(2)).lower()
-            self.CODES[link_lookup_id] = code
+        if check:
+            found = re.search(self.PATTERN, check)
+            if not found:
+                self.LINES_WITHOUT_CODES += 1
+            else:
+                self.CODES_FOUND += 1
+                code = str(found.group(2)).lower()
+                self.CODES[link_lookup_id] = code
+        
+        self.COUNT_PROCESSED += 1
         return True
     
     def report(self):
         logging.info('Codes extracted: %s'%self.CODES_FOUND)
         logging.info('Lines without codes %s:'%self.LINES_WITHOUT_CODES)
         
+        # Report on line issues.
+        if self.LINE_ISSUES:
+            logging.warn('Line issues occurred.')
+            logging.info('Line issues found: %s'%len(self.LINE_ISSUES))
+            for item in self.LINE_ISSUES:
+                logging.debug(item)
+                
+        # Check observation that total should equal lines processed.
+        total = self.CODES_FOUND + self.LINES_WITHOUT_CODES + len(self.LINE_ISSUES)
+        if total<>self.COUNT_PROCESSED:
+            logging.critical('Count mismatch when processing actions.')
+            logging.info('Total was: %s'%total)
+            logging.info('Count processed: %s'%self.COUNT_PROCESSED)
+        
     def pickle_codes(self, filepath):
         # Pickle codes so to speed up test runs.
         logging.info('Pickling codes to: %s'%filepath)
-        pickle.dump(self.CODES, open(filepath, 'wb'))
+        #pickle.dump(self.CODES, open(filepath, 'wb'))
 
 class Links(object):
     '''Process data from table: log_link_visit_action '''
@@ -370,7 +397,7 @@ class Visits(object):
                 logging.debug(item)
              
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, filename='result_old2new.log')
+    logging.basicConfig(level=logging.INFO)#, filename='result_old2new.log')
     c = Converter()
     c.run_all()
     
