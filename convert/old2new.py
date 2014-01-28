@@ -258,7 +258,10 @@ class Visits(object):
                  (46,8, 'visitor_days_since_first'), # 0
                  )
         
-        self.FIELD_ISSUES = list()
+        # Keep a record of any issues that occur during processing.
+        self.FIELD_ISSUES = list() # while converting a line
+        self.COMPARE_ISSUES = list() # during conversion checks
+        self.MOVE_ISSUES = list() # that exact values change location
         
     def enable_compare(self, header):
         '''List of fields to use when comparing lines.'''
@@ -292,7 +295,8 @@ class Visits(object):
                 okay = lenA == 0
             else: # additions
                 okay = lenB+check == lenA
-            if not okay:
+            if not okay:  # logs 4 notes per item
+                issues.append('idvisit=%s'%line[0])
                 issues.append('slice=%s'%str(s))
                 issues.append('before=%s'%before)
                 issues.append('after=%s'%after)
@@ -302,18 +306,15 @@ class Visits(object):
         for move in self.CHECK_MOVES:
             m_before = line[move[0]]
             m_after = content[move[1]]
-            if m_before <> m_after:
+            if m_before <> m_after: # logs 3 notes per item
                 field = move[2]
-                logging.debug('Moving mis-match for field: %s'%field)
-                logging.debug('%s before=%s'%(field, m_before))
-                logging.debug('%s after=%s'%(field, m_after))
+                self.MOVE_ISSUES.append('idvisit=%s'%line[0])
+                self.MOVE_ISSUES.append('%s before=%s'%(field, m_before))
+                self.MOVE_ISSUES.append('%s after=%s'%(field, m_after))
                 
         # Confirm the whole line is okay or provide feedback for issues.
-        if issues: 
-            logging.warn('Check idvisit: %s'%line[0])
-            logging.info('Number of issues found: %s'%(len(issues)/3))
-            for issue in issues:
-                logging.debug(issue)
+        if issues:
+            self.COMPARE_ISSUES.extend(issues)
             return False
         else:
             return True
@@ -341,14 +342,22 @@ class Visits(object):
             return False
             
     def report(self):
-        fissues = self.FIELD_ISSUES
-        if fissues:
-            logging.warn('There were issues with the number of fields in a line.')
-            logging.info('Number of lines effected: %s'%len(fissues))
-            for issue in fissues:
-                logging.debug(issue)
-                    
+        # Report issues that stopped line being processes.
+        reports = (#(list of issues, type of issue, number of notes per issue
+                   (self.FIELD_ISSUES, 'Field', 1),
+                   (self.COMPARE_ISSUES, 'Compare', 4),
+                   (self.MOVE_ISSUES, 'Move', 3),
+                   )
+        
+        for report in reports:
+            issue = report[1]
+            found = len(report[0])/report[2]
+            logging.warn('%s issues occurred.'%issue)
+            logging.info('%s issues found: %s'%(issue, found))
+            for item in report[0]:
+                logging.debug(item)
+             
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG, filename='result_old2new.log')
     c = Converter()
     c.run_all()
