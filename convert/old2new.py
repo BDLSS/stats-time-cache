@@ -193,7 +193,7 @@ class Actions(object):
     def pickle_codes(self, filepath):
         # Pickle codes so to speed up test runs.
         logging.info('Pickling codes to: %s'%filepath)
-        #pickle.dump(self.CODES, open(filepath, 'wb'))
+        pickle.dump(self.CODES, open(filepath, 'wb'))
 
 class Links(object):
     '''Process data from table: log_link_visit_action '''
