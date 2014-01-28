@@ -104,6 +104,7 @@ class Converter(object):
         fun = self.VISITS.process_line
         hstore = self.VISITS.enable_compare
         self._process_file_with_function(fpath, fun, headstore=hstore)
+        self.VISITS.report()
         outfile = os.path.join(self.DIR_NEW, self.FILE_VISITS) 
         self.save_converted(self.VISITS, outfile)
         
@@ -257,6 +258,8 @@ class Visits(object):
                  (46,8, 'visitor_days_since_first'), # 0
                  )
         
+        self.FIELD_ISSUES = list()
+        
     def enable_compare(self, header):
         '''List of fields to use when comparing lines.'''
         self.FIELDS = header
@@ -333,8 +336,18 @@ class Visits(object):
             self.DATA.append(content)
             return True
         except IndexError:
+            entry = 'fcount=%s line=%s'%(len(line), line)
+            self.FIELD_ISSUES.append(entry)
             return False
             
+    def report(self):
+        fissues = self.FIELD_ISSUES
+        if fissues:
+            logging.warn('There were issues with the number of fields in a line.')
+            logging.info('Number of lines effected: %s'%len(fissues))
+            for issue in fissues:
+                logging.debug(issue)
+                    
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     c = Converter()
