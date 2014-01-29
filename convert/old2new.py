@@ -13,6 +13,8 @@ import codecs
 DETAILED_DEBUG_LINKS = False
 DETAILED_DEBUG_VISITS = False
 
+IGNORE_LINE_IN_COUNT = 'Ignore this line when counting conversions.'
+
 class Converter(object):
     '''Control the conversion process.'''
     def __init__(self):
@@ -57,8 +59,10 @@ class Converter(object):
                     if converted == limit:
                         break
                     line = lines.next()
-                    if function(line):
-                        converted += 1
+                    result = function(line)
+                    if result:
+                        if result <> IGNORE_LINE_IN_COUNT:
+                            converted += 1
                     else:
                         failed += 1
                 except csv.Error:
@@ -202,6 +206,7 @@ class Links(object):
         self.DATA = list() # Converted data.
         self.LINE_LEN_EXPECTED = 20 # number of expected fields
         self.LINE_LEN_FAULTS = list() # store faulty lines for checking
+        self.COUNT_LINESPLITS3_18 = 0 # how many lines are getting split early
         
     def enable_action_lookup(self, codes):
         '''Dictionary of actions to lookup codes to insert.'''
@@ -227,7 +232,8 @@ class Links(object):
         # we need to combine the two lines first.
         if length == 3:
             self.LAST_LINE = line # store the line for next loop
-            return False
+            self.COUNT_LINESPLITS3_18 += 1
+            return IGNORE_LINE_IN_COUNT
         elif length == 18: # and splits the binary string
             combined = self.LAST_LINE
             combined.extend(line) # combine current line with last
@@ -245,6 +251,8 @@ class Links(object):
     def process_line(self, line):
         #Find the custom variable and insert into current line
         action_id = self.get_id(line)
+        if action_id == IGNORE_LINE_IN_COUNT:
+            return action_id
         if not action_id:
             return False
         custom_var_code = 11
@@ -280,6 +288,10 @@ class Links(object):
             logging.warn("Input lines with unexpected counts: %s"%lenfau)
             for line in self.LINE_LEN_FAULTS:
                 logging.debug(line)
+                
+        if self.COUNT_LINESPLITS3_18:
+            msg = 'Num of lines split into 3 /18 combos: %s'%self.COUNT_LINESPLITS3_18
+            logging.info(msg)
 
 class Visits(object):
     '''Process data from table: log_visit '''
