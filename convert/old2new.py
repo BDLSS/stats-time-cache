@@ -241,7 +241,8 @@ class Links(object):
             combined[2] = r'%s%s'%(combined[2], chunk)
             line = combined
             self.LAST_LINE = '' # reset until required again"""
-
+            length = len(line) # need to reset the length
+            
         if length <> self.LINE_LEN_EXPECTED:
             self.LINE_LEN_FAULTS.append('count=%s for: %s'%(length, line))
             return False
