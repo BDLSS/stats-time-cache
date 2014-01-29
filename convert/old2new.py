@@ -236,7 +236,7 @@ class Links(object):
             line = combined
             self.LAST_LINE = '' # reset until required again"""
 
-        elif length <> self.LINE_LEN_EXPECTED:
+        if length <> self.LINE_LEN_EXPECTED:
             self.LINE_LEN_FAULTS.append('count=%s for: %s'%(length, line))
             return False
         else:
