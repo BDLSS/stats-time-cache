@@ -31,6 +31,8 @@ class Converter(object):
         self.LINKS = Links()
         self.VISITS = Visits()
         
+        self.CODEC = 'iso8859_15' # for reading and writing to files.
+        
     def _process_file_with_function(self, filepath, function,
                                     limit=None, headstore=None):
         '''Process the lines in contained in filepath with function.'''
@@ -46,7 +48,7 @@ class Converter(object):
         
         # The suggestion of which encoding to use came from 
         # opening the original file in Kate text editor.
-        with codecs.open(filepath, 'rb', 'iso8859_15') as infile:
+        with codecs.open(filepath, 'rb', self.CODEC) as infile:
             #Start processing the file.
             lines = csv.reader(infile, delimiter=self.DELIMITER)
             header = lines.next() # assume data has a header row
@@ -133,7 +135,7 @@ class Converter(object):
     def save_converted(self, data_source, filepath):
         '''Save the contents of data source to file path.'''
         logging.info('Saving converted file to: %s'%filepath)
-        outfile = open(filepath, 'wb')
+        outfile = codecs.open(filepath, 'wb', self.CODEC)
         for data in data_source.DATA:
             line = "\t".join(data)
             outfile.write('%s\n'%line)
