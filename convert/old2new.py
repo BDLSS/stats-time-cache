@@ -218,8 +218,26 @@ class Links(object):
     
     def get_id(self, line):
         '''Check line matches expected patterns.'''
-        if len(line) <> self.LINE_LEN_EXPECTED:
-            self.LINE_LEN_FAULTS.append(line)
+        length = len(line)
+        
+        # Fix error in binary field that seems to be causing issues.
+        # It seems that for ~0.5 million "lines" that the line
+        # length is 3 and the following "line" is 18. Expected "lines"
+        # are getting split early on a field with a binary string. So,
+        # we need to combine the two lines first.
+        if length == 3:
+            self.LAST_LINE = line # store the line for next loop
+            return False
+        elif length == 18: # and splits the binary string
+            combined = self.LAST_LINE
+            combined.extend(line) # combine current line with last
+            chunk = combined.pop(3) # get the bit of binary string
+            combined[2] = r'%s%s'%(combined[2], chunk)
+            line = combined
+            self.LAST_LINE = '' # reset until required again"""
+
+        elif length <> self.LINE_LEN_EXPECTED:
+            self.LINE_LEN_FAULTS.append('count=%s for: %s'%(length, line))
             return False
         else:
             return line[5] #don't put this in a try block
