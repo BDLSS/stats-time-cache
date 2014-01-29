@@ -40,8 +40,9 @@ class Converter(object):
         logging.info('Using function: %s'%function)
         logging.info('Number of lines limited to: %s'%limit)
         converted = 0 # lines that converted okay
-        failed = 0 # attempts at conversion that failed
-        skipped = 0 # lines that caused CSV errors
+        fails = 0 # attempts at conversion that failed
+        skips = 0 # lines that caused CSV errors
+        ignores = 0 # number of lines to not count as converted
         
         # The suggestion of which encoding to use came from 
         # opening the original file in Kate text editor.
@@ -61,19 +62,26 @@ class Converter(object):
                     line = lines.next()
                     result = function(line)
                     if result:
-                        if result <> IGNORE_LINE_IN_COUNT:
+                        if result == IGNORE_LINE_IN_COUNT:
+                            ignores += 1
+                        else:
                             converted += 1
                     else:
-                        failed += 1
+                        fails += 1
                 except csv.Error:
                     self.check_line_error(line)
-                    skipped += 1
+                    skips += 1
                 except StopIteration:
                     break
         logging.info('Number of lines converted: %s'%converted)
-        logging.info('Number of lines that failed to convert: %s'%failed)
-        logging.info('Number lines skipped: %s'%skipped)
-        if skipped > 20:
+        logging.info('Number of lines told to not count: %s'%ignores)
+        logging.info('Number of lines that fails to convert: %s'%fails)
+        logging.info('Number lines skips: %s'%skips)
+        total = converted+ignores+fails+skips
+        msg = 'Total number of lines looked at: %s'%total
+        logging.info(msg)
+        
+        if skips > 20:
             logging.warn('Skipped lines were greater than 20.')
     
     def check_line_error(self, line):
