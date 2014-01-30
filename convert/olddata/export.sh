@@ -6,3 +6,8 @@ echo 'Export actions.'
 mysql piwik --user=stat_export -e 'SELECT * FROM piwik_log_action' > actions.tsv
 echo 'Export visits.'
 mysql piwik --user=stat_export -e 'SELECT * FROM piwik_log_visit' > visits.tsv
+#
+# Dump the entire DB for migration to new server.
+#
+#mysqldump -u [username] -p[PASSWORD] piwik > orastatspiwik.sql
+#bzip2 orastatspiwik.sql
