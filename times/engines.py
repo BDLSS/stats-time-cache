@@ -63,21 +63,21 @@ class SingleRequest(object):
     
 class Runner(object):
     '''Runs all the available engines.'''
-    def __init__(self):
-        self.REPORTS= list()
+    def __init__(self, saveto):
+        '''Prepare to run engines and save report to file specified.'''
+        self.RESULT = list()
         self.DIV1 = '='*50
         self.DIV2 = '-'*50
+        self.REPORT_SAVE = saveto
         
     def run_engines(self):
         '''Run all the available engines.'''
+        self.save(header=True)
+
         self.run_engines_single()
-    
-    def report_time(self, prefix=''):
-        when = time.strftime('%y-%m-%d at %H:%M:%S', time.gmtime())
-        return '%s%s\n'%(prefix, when)
-    
-    def log(self, message):
-        self.REPORTS.append(message)
+        
+        self.log('%s\nEnd for report.\n%s\n'%(self.DIV1, self.DIV1))
+        self.save()
         
     def run_engines_single(self):
         '''Run engines that can get data with a single request.'''
@@ -97,28 +97,39 @@ class Runner(object):
             self.log('%s\n'%self.DIV2)
             self.log(sam.summary_table())
             self.log('\n%s\n\n'%self.DIV2)
+            self.save()
+            self.RESULT = list()
+            time.sleep(1)
     
-    def save(self, filepath):
+    def report_time(self, prefix=''):
+        when = time.strftime('%y-%m-%d at %H:%M:%S', time.gmtime())
+        return '%s%s\n'%(prefix, when)
+    
+    def log(self, message):
+        self.RESULT.append(message)
+    
+    def save(self, header=False):
         '''Save a report of this run to the filepath.'''
-        d = self.DIV1
-        content = '%s\nSummary of tests.\n%s\n'%(d, d)
-        content += '-For each method, the start and finish time is shown.\n'
-        content += '-Each sample, the time taken in minutes is first.\n'
-        content += '-For a small sample time in seconds is a better measure.\n'
-        content += '-Average time to get results for each item in sample.\n'
-        content += '-The name of the sample contains the sample size.\n'
-        content += '%s\n%s\n'%(self.DIV1,self.report_time('Generated: '))
+        if header:
+            fmode= 'w'
+            content = '%s\nSummary of tests.\n%s\n'%(self.DIV1, self.DIV1)
+            content += '-For each method, the start and finish time is shown.\n'
+            content += '-Each sample, the time taken in minutes is first.\n'
+            content += '-For a small sample time in seconds is a better measure.\n'
+            content += '-Average time to get results for each item in sample.\n'
+            content += '-The name of the sample contains the sample size.\n'
+            content += '%s\n%s\n'%(self.DIV1,self.report_time('Generated: '))
+        else:
+            fmode = 'a'
+            content = ''
+            for report in self.RESULT:
+                content += report
         
-        for report in self.REPORTS:
-            content += report
-        content += '%s\nEnd for report.\n%s\n'%(d, d)
-        with file(filepath, 'w') as outfile:
+        with file(self.REPORT_SAVE, fmode) as outfile:
             outfile.write(content)
         
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     report = os.path.join(os.getcwd(),'reports','summary_engines.txt') 
-    r = Runner()
+    r = Runner(report)
     r.run_engines()
-    r.save(report)
-    
