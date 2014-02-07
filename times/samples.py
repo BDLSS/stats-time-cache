@@ -15,6 +15,9 @@ class SampleSet(object):
         self.NAME = None # name of sample
         self.KRESULT = 'result' # keys to store data
         self.KTOOK = 'took'
+        self.TIME_TOTAL = 0
+        self.TIME_AVERAGE = 0
+        self.TIME_MINUTES = 0
         
     def test_engine_quick(self, scode):
         '''Get results for scode using random values.'''
@@ -49,26 +52,28 @@ class SampleSet(object):
             else:
                 time_taken = iend-istart
             self.ITEMS[item][self.KTOOK] = time_taken 
-        total, avg = self.get_times()
-        logging.info('Total time: %s'%total)
-        logging.info('Average time: %s'%avg)
+        self.calc_times()
+        logging.info('Total time: %s'%self.TIME_TOTAL)
+        logging.info('Average time: %s'%self.TIME_AVERAGE)
 
-    def get_times(self):
+    def calc_times(self):
         '''Return the total and average times for this set.'''
         totaltime = 0.0
         for item in self.ITEMS:
             totaltime += self.ITEMS[item][self.KTOOK]
         avetime = totaltime/len(self.ITEMS)
-        return '%.3f'%totaltime, '%.3f'%avetime
+        self.TIME_TOTAL = '%.3f'%(totaltime)
+        self.TIME_AVERAGE = '%.3f'%avetime
+        self.TIME_MINUTES = '%.3f'%(totaltime/60)
 
     def result(self):
         '''Return a summary of results.'''
         answer = list()
         numitems = len(self.ITEMS)
         answer.append('Number of items: %s'%numitems) 
-        totaltime, average = self.get_times()
-        answer.append('Total time taken: %s'%totaltime)
-        answer.append('Average time taken: %s'%average)        
+        answer.append('Total time taken: %s'%self.TIME_TOTAL)
+        answer.append('Average time taken: %s'%self.TIME_AVERAGE)
+        answer.append('Minutes taken: %s'%self.TIME_MINUTES)
         return '\n'.join(answer)
                 
     def save(self, fname):
@@ -79,7 +84,7 @@ class SampleSet(object):
             result = self.ITEMS[item][self.KRESULT]
             time = '%.3f'%self.ITEMS[item][self.KTOOK]
             content.append('%s\t%s\t%s'%(result, time, item))
-        total, avg = self.get_times()
+        total, avg = self.TIME_TOTAL, self.TIME_AVERAGE
         content.append('%s\t%s\tTimes, total and average'%(total, avg))
         
         lines = '\n'.join(content)
