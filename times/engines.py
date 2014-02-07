@@ -77,9 +77,9 @@ class Runner(object):
             sam = samples.Samples()
             sam.enable(singles.get, source)
             sam.runall()
-            print sam.summary_table()
+            sam.save()
         
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    #logging.basicConfig(level=logging.INFO)
     r = Runner()
     
