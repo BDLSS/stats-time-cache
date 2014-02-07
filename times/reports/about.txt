@@ -16,7 +16,6 @@ Engines
 These perform the same query using different methods.
 
 -quick
-An internal test routine that generates random data. It includes
-random time delays unless in very quick mode. This cuts the query
-delay to mostly nothing so all reports only take a few seconds
-to generate. 
+An internal test routine that generates random data. It reports a
+random time delay between 0.1 and 1.5 seconds. This does not
+impact run speeds so all reports will take <1 second to make.
