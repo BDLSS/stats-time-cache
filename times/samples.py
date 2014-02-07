@@ -104,7 +104,7 @@ class Samples(object):
         self.SAMPLES = dict() # store for samples
         self.SAMPLE_LIMIT = SAMPLES_LIMIT # limit number of samples
         self.OUTDIR = self.output_dir() # location to save results
-        self.SAMDIR = 'samples'
+        self.SAMDIR = 'batches'
         self.SAMEXT = '.csv'
         self.load()
         
