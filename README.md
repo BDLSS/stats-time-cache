@@ -49,3 +49,12 @@ How library staff record such "enquiry events" is out of the scope
 of this project. (Previous work used a desktop application installed
 on 100+ desktops to collect the data but you could use an intranet web
 pages, a VLE or plugin to Intergrated Library System instead.)
+
+Aim 1 - set of tests
+====================
+See the folder "times".
+
+samples.py - runs samples taken from batches folder, outputs to reports
+engines.py - runs samples.py against a range of engines
+
+An internal "quick" engine is used if you run samples.py directly.
