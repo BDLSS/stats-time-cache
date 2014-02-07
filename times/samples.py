@@ -62,9 +62,9 @@ class SampleSet(object):
         for item in self.ITEMS:
             totaltime += self.ITEMS[item][self.KTOOK]
         avetime = totaltime/len(self.ITEMS)
-        self.TIME_TOTAL = '%.3f'%(totaltime)
-        self.TIME_AVERAGE = '%.3f'%avetime
-        self.TIME_MINUTES = '%.3f'%(totaltime/60)
+        self.TIME_TOTAL = '%.0f'%(totaltime)
+        self.TIME_AVERAGE = '%.2f'%avetime
+        self.TIME_MINUTES = '%.0f'%(totaltime/60)
 
     def result(self):
         '''Return a summary of results.'''
@@ -165,7 +165,7 @@ class Samples(object):
     
     def summary_table(self):
         answer = list()
-        answer.append('Minutes\tSecs\tAverage\tSample')
+        answer.append('TMins\tTSecs\tTAverage\tSample')
         for sample in sorted(self.SAMPLES):
             t = self.SAMPLES[sample].TIME_TOTAL
             a = self.SAMPLES[sample].TIME_AVERAGE
