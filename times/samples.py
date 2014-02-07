@@ -65,7 +65,7 @@ class SampleSet(object):
         for item in self.ITEMS:
             totaltime += self.ITEMS[item][self.KTOOK]
         avetime = totaltime/len(self.ITEMS)
-        self.TIME_TOTAL = '%.0f'%(totaltime)
+        self.TIME_TOTAL = '%.1f'%(totaltime)
         self.TIME_AVERAGE = '%.2f'%avetime
         self.TIME_MINUTES = '%.0f'%(totaltime/60)
 
