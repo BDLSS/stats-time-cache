@@ -1,0 +1,22 @@
+Contains the output of running timing tests.
+
+
+Sample reports
+-----------------------
+Results for each set of samples and the different
+engines used will appear.
+
+-Where the filename starts with the sample name.
+-A hyphen is followed by the engine used.
+-They are all TSV files.
+
+
+Engines
+-------
+These perform the same query using different methods.
+
+-quick
+An internal test routine that generates random data. It includes
+random time delays unless in very quick mode. This cuts the query
+delay to mostly nothing so all reports only take a few seconds
+to generate. 

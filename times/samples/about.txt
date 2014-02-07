@@ -1,0 +1,11 @@
+This folder contains samples that contain
+lists of codes to test for. Where each code
+should appear on new line.
+
+Filenames
+------------
+-first digit controls the run order.
+-word is hint of the source.
+-digits are the number of codes contained within
+-the samples script looks for *.csv
+ 
