@@ -101,7 +101,13 @@ class Runner(object):
         '''Save a report of this run to the filepath.'''
         d = self.DIV1
         content = '%s\nSummary of tests.\n%s\n'%(d, d)
-        content += '%s\n'%self.report_time('Generated: ')
+        content += '-For each method, the start and finish time is shown.\n'
+        content += '-Each sample, the time taken in minutes is first.\n'
+        content += '-For a small sample time in seconds is a better measure.\n'
+        content += '-Average time to get results for each item in sample.\n'
+        content += '-The name of the sample contains the sample size.\n'
+        content += '%s\n%s\n'%(self.DIV1,self.report_time('Generated: '))
+        
         for report in self.REPORTS:
             content += report
         content += '%s\nEnd for report.\n%s\n'%(d, d)
