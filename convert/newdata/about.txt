@@ -1,2 +1,0 @@
-This folder contains the data converted from Piwik ready for
-loading into a new version of Piwik with some data conversions.
