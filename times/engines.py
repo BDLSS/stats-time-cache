@@ -2,6 +2,7 @@
 import logging
 import urllib2 # to fetch data
 import time # to time it
+import os
 
 import samples # enable the running of samples
 
@@ -62,24 +63,55 @@ class SingleRequest(object):
 class Runner(object):
     '''Runs all the available engines.'''
     def __init__(self):
-        self.run_engines()
+        self.REPORTS= list()
+        self.DIV1 = '='*50
+        self.DIV2 = '-'*50
         
     def run_engines(self):
         '''Run all the available engines.'''
         self.run_engines_single()
     
+    def report_time(self, prefix=''):
+        when = time.strftime('%y-%m-%d at %H:%M:%S', time.gmtime())
+        return '%s%s\n'%(prefix, when)
+    
+    def log(self, message):
+        self.REPORTS.append(message)
+        
     def run_engines_single(self):
         '''Run engines that can get data with a single request.'''
         singles  = SingleRequest()
         for source in singles.SOURCES:
-            logging.info('Running engine: %s'%source)
+            logging.info('Running engine: %s'%source) 
+            self.log('\n%s\n%s\n'%(source, self.DIV2))
+            self.log(self.report_time('Start: '))
+            
             singles.setup(source)
             sam = samples.Samples()
             sam.enable(singles.get, source)
             sam.runall()
             sam.save()
+            
+            self.log(self.report_time('Finish: '))
+            self.log('%s\n'%self.DIV2)
+            self.log(sam.summary_table())
+            self.log('\n%s\n\n'%self.DIV2)
+    
+    def save(self, filepath):
+        '''Save a report of this run to the filepath.'''
+        d = self.DIV1
+        content = '%s\nSummary of tests.\n%s\n'%(d, d)
+        content += '%s\n'%self.report_time('Generated: ')
+        for report in self.REPORTS:
+            content += report
+        content += '%s\nEnd for report.\n%s\n'%(d, d)
+        with file(filepath, 'w') as outfile:
+            outfile.write(content)
         
 if __name__ == '__main__':
     #logging.basicConfig(level=logging.INFO)
+    report = os.path.join(os.getcwd(),'reports','summary_engines.txt') 
     r = Runner()
+    r.run_engines()
+    r.save(report)
     
