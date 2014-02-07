@@ -43,6 +43,7 @@ class SampleSet(object):
         
     def run(self):
         '''Run items against the engine getting results and time taken.'''
+        logging.info('Using engine: %s'%self.ENGINE)
         for item in self.ITEMS:
             istart = time.time()
             self.ITEMS[item][self.KRESULT], etime = self.ENGINE(item)
