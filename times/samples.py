@@ -5,7 +5,6 @@ import time
 import random
 import os
 
-QUICK_TEST = False # If True a random delay is used in test engine.
 SAMPLES_LIMIT = 1000 # Limit the number of samples to test.
 
 class SampleSet(object):
@@ -19,11 +18,10 @@ class SampleSet(object):
         
     def test_engine_quick(self, scode):
         '''Get results for scode using random values.'''
-        if not QUICK_TEST:
-            time.sleep(random.uniform(0.0, 0.1))
+        timetaken = random.uniform(0.1, 1.5)
         views = random.randint(101,199)
         downs = random.randint(1,99)
-        return '%s;%s'%(views,downs)
+        return '%s;%s'%(views,downs), timetaken
 
     def load(self, lines):
         '''Extract items to query from lines.'''
@@ -44,9 +42,13 @@ class SampleSet(object):
         '''Run items against the engine getting results and time taken.'''
         for item in self.ITEMS:
             istart = time.time()
-            self.ITEMS[item][self.KRESULT] = self.ENGINE(item)
+            self.ITEMS[item][self.KRESULT], etime = self.ENGINE(item)
             iend = time.time()
-            self.ITEMS[item][self.KTOOK] = iend-istart
+            if etime: # enable engine to return time taken
+                time_taken = etime
+            else:
+                time_taken = iend-istart
+            self.ITEMS[item][self.KTOOK] = time_taken 
         total, avg = self.get_times()
         logging.info('Total time: %s'%total)
         logging.info('Average time: %s'%avg)
