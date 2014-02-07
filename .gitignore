@@ -38,3 +38,5 @@ nosetests.xml
 # Stop exported TSV and pickle files showing.
 *.tsv
 *.pickle
+*.csv
+*.zip
