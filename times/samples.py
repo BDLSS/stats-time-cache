@@ -6,6 +6,7 @@ import random
 import os
 
 SAMPLES_LIMIT = 1000 # Limit the number of samples to test.
+QUICK_MAX = 0.5 # maximum time quick engine can pretend to take
 
 class SampleSet(object):
     '''Set of items to get results from engine and gather timings.'''
@@ -21,7 +22,7 @@ class SampleSet(object):
         
     def test_engine_quick(self, scode):
         '''Get results for scode using random values.'''
-        timetaken = random.uniform(0.1, 1.5)
+        timetaken = random.uniform(0.1, QUICK_MAX)
         views = random.randint(101,199)
         downs = random.randint(1,99)
         return '%s;%s'%(views,downs), timetaken
