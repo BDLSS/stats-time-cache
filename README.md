@@ -5,7 +5,7 @@ Abstract method of caching statistical "event" so you can quickly generate compa
 
 Initial Aims
 ============
-1. To create a set of unit tests that can be used to time
+1. To create a set of tests that can be used to time
 how long a system takes to return results of certain summaries.
 
 2. Create or load a test data set containing at least 4-10 years
@@ -25,3 +25,27 @@ time-based queries over multiple years and enable 3 to use it.
 
 7. Enable logging of usage (processor/IO etc.) on the server during
 tests, in addition to visual checks.
+
+Summaries
+=========
+Task 1 will test:
+A. Total views and downloads for a random selection of "objects".
+B. Test certain "objects" where high usage is known to exist meaning
+they are likely to be stored in various caches Piwik creates.
+C. For a particular "object" extract total downloads for each month
+over at least 1-10 years.
+
+What are events?
+================
+This work originated with relation to obtaining summaries of views 
+and downloads "events" of particular "objects" in an open access
+repository. It is the main focus of this project.
+
+However, if you redefine "events" there is the potential to use the
+same collection and reporting method to automate production of
+"library enquiry" statistics. So, an aim is to keep "events" generic.
+
+How library staff record such "enquiry events" is out of the scope
+of this project. (Previous work used a desktop application installed
+on 100+ desktops to collect the data but you could use an intranet web
+pages, a VLE or plugin to Intergrated Library System instead.)
