@@ -163,6 +163,17 @@ class Samples(object):
         answer.append('='*50)
         return '\n'.join(answer)
     
+    def summary_table(self):
+        answer = list()
+        answer.append('Minutes\tSecs\tAverage\tSample')
+        for sample in sorted(self.SAMPLES):
+            t = self.SAMPLES[sample].TIME_TOTAL
+            a = self.SAMPLES[sample].TIME_AVERAGE
+            m = self.SAMPLES[sample].TIME_MINUTES
+            line = '%s\t%s\t%s\t%s'%(m, t, a , sample)
+            answer.append(line)
+        return '\n'.join(answer)
+        
     def __str__(self):
         return self.result()
         
@@ -172,4 +183,4 @@ if __name__ == "__main__":
     s.enable() # this will use internal test engine
     s.runall()
     print s
-    
+    print s.summary_table()
