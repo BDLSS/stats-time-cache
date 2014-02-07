@@ -107,6 +107,7 @@ class Samples(object):
         self.OUTDIR = self.output_dir() # location to save results
         self.SAMDIR = 'batches'
         self.SAMEXT = '.csv'
+        self.NAME = None # name of the set of samples
         self.load()
         
     def output_dir(self):
@@ -135,6 +136,7 @@ class Samples(object):
     def enable(self, engine=None, name=None):
         '''Enable the engines and names for all samples.'''
         logging.info('Using engine: %s'%engine)
+        self.NAME = name
         for sample in self.SAMPLES:
             self.SAMPLES[sample].enable(engine, name)
     
@@ -178,7 +180,15 @@ class Samples(object):
             line = '%s\t%s\t%s\t%s'%(m, t, a , sample)
             answer.append(line)
         return '\n'.join(answer)
-        
+    
+    def save(self):
+        '''Save a summary of results for all samples.'''
+        if not self.NAME:
+            self.NAME = 'quick'
+        fname = os.path.join(self.OUTDIR,'summary-%s.tsv'%self.NAME)
+        with file(fname, 'w') as outfile:
+            outfile.write(self.summary_table())
+            
     def __str__(self):
         return self.result()
         
@@ -189,3 +199,4 @@ if __name__ == "__main__":
     s.runall()
     print s
     print s.summary_table()
+    s.save()
