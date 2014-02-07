@@ -3,6 +3,7 @@ import logging
 import urllib2 # to fetch data
 import time # to time it
 import os
+import socket # to capture error
 
 import samples # enable the running of samples
 
@@ -53,7 +54,7 @@ class SingleRequest(object):
             indata = urllib2.urlopen(address, timeout=5.0)
             viewsdownloads = str(indata.read()).strip()
             indata.close()
-        except urllib2.HTTPError:
+        except urllib2.HTTPError, socket.error:
             viewsdownloads = '0;0'
         iend = time.time()
         timetaken = iend-istart
@@ -115,7 +116,7 @@ class Runner(object):
             outfile.write(content)
         
 if __name__ == '__main__':
-    #logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO)
     report = os.path.join(os.getcwd(),'reports','summary_engines.txt') 
     r = Runner()
     r.run_engines()
