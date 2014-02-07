@@ -5,8 +5,9 @@ import time
 import random
 import os
 
-SAMPLES_LIMIT = 1000 # Limit the number of samples to test.
+SAMPLES_LIMIT = 100 # Limit the number of samples to test.
 QUICK_MAX = 0.5 # maximum time quick engine can pretend to take
+PAUSE_BETWEEN_SAMPLES = 1
 
 class SampleSet(object):
     '''Set of items to get results from engine and gather timings.'''
@@ -147,6 +148,8 @@ class Samples(object):
             name = name.replace(self.SAMEXT, '')
             fname = os.path.join(self.OUTDIR, name)
             self.SAMPLES[sample].save(fname)
+            if PAUSE_BETWEEN_SAMPLES:
+                time.sleep(PAUSE_BETWEEN_SAMPLES)
     
     def result(self):
         '''Return a summary of all samples.'''
