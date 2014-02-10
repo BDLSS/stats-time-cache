@@ -29,7 +29,7 @@ class Engine(object):
             host = self.HOST
         if not self.CONNECTION:
             self.CONNECTION = httplib.HTTPConnection(host, timeout=10)
-        logging.debug('Connection: %s'%host)
+            logging.debug('New connection: %s'%host)
 
     def get(self, suburl):
         '''Return response to a get request for suburl from the host.'''
@@ -184,9 +184,9 @@ class Runner(object):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     report = os.path.join(os.getcwd(),'reports','summary_engines.txt') 
-    #r = Runner(report)
-    #.run_engines()
+    r = Runner(report)
+    r.run_engines()
      
-    e = Engine()
-    print e.get('/results/dv/8b/0b/6cac-e205-41d9-a9f8-f0ca39f6b7eb').read()
-    print e.get('/results/dv/53/2d/3978-9c85-4dc3-a6f7-73b3bd1814f3').read()
+    #e = Engine()
+    #print e.get('/results/dv/8b/0b/6cac-e205-41d9-a9f8-f0ca39f6b7eb').read()
+    #print e.get('/results/dv/53/2d/3978-9c85-4dc3-a6f7-73b3bd1814f3').read()
