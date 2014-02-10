@@ -4,9 +4,50 @@ import urllib2 # to fetch data
 import time # to time it
 import os
 import socket # to capture error
+import httplib
+#httplib.HTTPConnection.debuglevel = 1
 
 import samples # enable the running of samples
-    
+
+class EngineError(Exception):
+    pass
+
+class Engine(object):
+    '''Connection to an engine via an HTTP connection.'''
+    def __init__(self, host='orastats.bodleian.ox.ac.uk', persist=True):
+        '''Connect to host with a persistent connection by default.'''
+        self.HOST = host
+        self.PERSIST = persist
+        self.CONNECTION = None # This does the fetching.
+        self.HEADERS = {'User-agent' : 'ora_timestats'}
+        if not persist: 
+            self.HEADERS['Connection'] = 'close'
+        
+    def connect(self, host=None):
+        '''Start a HTTP connection to host or use engine default.'''
+        if not host:
+            host = self.HOST
+        if not self.CONNECTION:
+            self.CONNECTION = httplib.HTTPConnection(host, timeout=10)
+        logging.debug('Connection: %s'%host)
+
+    def get(self, suburl):
+        '''Return response to a get request for suburl from the host.'''
+        if not self.CONNECTION:
+            self.connect()
+        try :
+            self.CONNECTION.request('GET', suburl, headers=self.HEADERS)
+            return self.CONNECTION.getresponse()
+        except (socket.error, httplib.CannotSendRequest, httplib.BadStatusLine):
+            raise EngineError
+        
+    def close(self):
+        '''Close the HTTP connection if required.'''
+        if not self.PERSIST and self.CONNECTION:
+            logging.debug('Closing connection')
+            self.CONNECTION.close()
+            
+                
 class SingleRequest(object):
     '''Engine to collect results where a single URL can be used.'''
     def __init__(self):
@@ -143,6 +184,9 @@ class Runner(object):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     report = os.path.join(os.getcwd(),'reports','summary_engines.txt') 
-    r = Runner(report)
-    r.run_engines()
-    
+    #r = Runner(report)
+    #.run_engines()
+     
+    e = Engine()
+    print e.get('/results/dv/8b/0b/6cac-e205-41d9-a9f8-f0ca39f6b7eb').read()
+    print e.get('/results/dv/53/2d/3978-9c85-4dc3-a6f7-73b3bd1814f3').read()
