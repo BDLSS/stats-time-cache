@@ -5,9 +5,7 @@ import time
 import random
 import os
 
-SAMPLES_LIMIT = 100 # Limit the number of samples to test.
 QUICK_MAX = 0.5 # maximum time quick engine can pretend to take
-PAUSE_BETWEEN_SAMPLES = 1
 
 class SampleSet(object):
     '''Set of items to get results from engine and gather timings.'''
@@ -101,9 +99,10 @@ class SampleSet(object):
         
 class Samples(object):
     '''Set of sample to run.'''
-    def __init__(self):
+    def __init__(self, sample_limit=100, pause_between=5):
+        self.SAMPLE_LIMIT = sample_limit # limit number of samples
+        self.PAUSE_BETWEEN = pause_between # seconds between samples
         self.SAMPLES = dict() # store for samples
-        self.SAMPLE_LIMIT = SAMPLES_LIMIT # limit number of samples
         self.OUTDIR = self.output_dir() # location to save results
         self.SAMDIR = 'batches'
         self.SAMEXT = '.csv'
@@ -150,8 +149,8 @@ class Samples(object):
             name = name.replace(self.SAMEXT, '')
             fname = os.path.join(self.OUTDIR, name)
             self.SAMPLES[sample].save(fname)
-            if PAUSE_BETWEEN_SAMPLES:
-                time.sleep(PAUSE_BETWEEN_SAMPLES)
+            if self.PAUSE_BETWEEN:
+                time.sleep(self.PAUSE_BETWEEN)
     
     def result(self):
         '''Return a summary of all samples.'''
@@ -194,7 +193,8 @@ class Samples(object):
         
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    s = Samples()
+    number_of_samples_to_test = 1
+    s = Samples(number_of_samples_to_test)
     s.enable() # this will use internal test engine
     s.runall()
     print s
