@@ -63,8 +63,10 @@ class SingleRequest(object):
     
 class Runner(object):
     '''Runs all the available engines.'''
-    def __init__(self, saveto):
+    def __init__(self, saveto, sample_limit=1, pause_between=1):
         '''Prepare to run engines and save report to file specified.'''
+        self.SAMPLE_LIMIT = sample_limit
+        self.PAUSE_BETWEEN = pause_between
         self.RESULT = list()
         self.DIV1 = '='*50
         self.DIV2 = '-'*50
@@ -88,7 +90,7 @@ class Runner(object):
             self.log(self.report_time('Start: '))
             
             singles.setup(source)
-            sam = samples.Samples()
+            sam = samples.Samples(self.SAMPLE_LIMIT, 1)
             sam.enable(singles.get, source)
             sam.runall()
             sam.save()
@@ -99,7 +101,7 @@ class Runner(object):
             self.log('\n%s\n\n'%self.DIV2)
             self.save()
             self.RESULT = list()
-            time.sleep(1)
+            time.sleep(self.PAUSE_BETWEEN)
     
     def report_time(self, prefix=''):
         when = time.strftime('%y-%m-%d at %H:%M:%S', time.gmtime())
