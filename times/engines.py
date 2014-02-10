@@ -109,7 +109,64 @@ class SingleRequest(object):
                 return 'n0;n0'
         else:
             return str(content).strip()
+
+class MultipleRequest(object):
+    '''Engine to collect results where multiple URLs are needed used.'''
+    def __init__(self):
+        self.URL_ROOT = ''
+        self.URL_SUBDIR = '' # enables usage if Piwik not in root dir
+        self.ENGINE = Engine()
     
+    def setup(self, root=None, subdir=''):
+        if not root:
+            root = 'orastats.bodleian.ox.ac.uk'
+        if subdir: # This will enable query of multiple Piwik installs
+            self.URL_SUBDIR = subdir # on the same server.
+        self.URL_ROOT = root
+        self.ENGINE.connect(self.URL_ROOT)
+        
+    def url_views(self, item):
+        if self.URL_SUBDIR:
+            return '/%s/views: %s'%(self.URL_SUBDIR, item)
+        else:
+            return '/views: %s'%item
+
+    def url_downs(self, item):
+        if self.URL_SUBDIR:
+            return '/%s/downs: %s'%(self.URL_SUBDIR, item)
+        else:
+            return '/downs: %s'%item
+        
+    def get(self, scode):
+        '''Get results for scode, timing all needed requests.'''
+        views = self.url_views(scode)
+        downs = self.url_downs(scode)
+        print views 
+        print downs
+        istart = time.time()
+        try:
+            vread = '1234567890'
+            #indata = self.ENGINE.get(views)
+            #vread = indata.read()
+        except EngineError:
+            vread = ''
+        try:
+            dread = '1234'
+            #indata = self.ENGINE.get(downs)
+            #dread = indata.read()
+        except EngineError:
+            dread = ''            
+        iend = time.time()
+        timetaken = iend-istart
+        self.ENGINE.close() # ignored if connection is persistent
+        
+        content = self.extract(vread, dread)
+        return content, timetaken
+
+    def extract(self, views, downloads):
+        '''Calculates view and downloads from information supplied.'''
+        return '%s;%s'%(len(views), len(downloads))
+        
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     
@@ -129,4 +186,12 @@ if __name__ == '__main__':
     sam.enable(s.get, source)
     sam.runall()
     print sam.result()
+    
+    # Test engine that needs to do multiple requests.
+    m =  MultipleRequest()
+    m.setup(subdir='piwik-customvars')
+    sam2 = samples.Samples(1, 1)
+    sam2.enable(m.get, 'multitest')
+    sam2.runall()
+    print sam2.result()
     
