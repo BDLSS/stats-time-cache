@@ -6,7 +6,7 @@ import os
 import socket # to capture error
 
 import samples # enable the running of samples
-
+    
 class SingleRequest(object):
     '''Engine to collect results where a single URL can be used.'''
     def __init__(self):
@@ -14,11 +14,12 @@ class SingleRequest(object):
         self.URL_ROOT = None
         self.URL_SOURCE = None # This will point to a method for calling
         self.SOURCES = ['or-static', 'or-vdown', 'or-indexed']
+        self.ENGINE = Engine()
     
     def setup(self, source, root=None):
         '''Source controls how the URL is combined with root url.'''
         if not root:
-            root = 'http://orastats.bodleian.ox.ac.uk/results/'
+            root = 'orastats.bodleian.ox.ac.uk'
         self.URL_ROOT = root
         if source not in self.SOURCES:
             raise ValueError
@@ -28,42 +29,51 @@ class SingleRequest(object):
             self.URL_SOURCE = self.url_vdown
         elif source == 'or-indexed':
             self.URL_SOURCE = self.url_indexed
-    
+        
     def url_static(self, item):
         '''Return the URL pattern for fetching data.'''
         d1 = item[5:7] # skip 'uuid:' and get first 2 chars 
         d2 = item[7:9] # directory level 2 is the next 2 chars
         fname = item[9:] # the filename is the rest of the uuid
-        sub = 'dv/%s/%s/%s'%(d1,d2,fname)
-        staturl = '%s%s'%(self.URL_ROOT,sub)
-        return staturl
+        return '/results/dv/%s/%s/%s'%(d1,d2,fname)
     
     def url_vdown(self, item):
-        url = '%svdown.php?scode=%s'%(self.URL_ROOT, item)
-        return url
+        return '/results/vdown.php?scode=%s'%item
         
     def url_indexed(self, item):
-        url = '%svdown_act.php?scode=%s'%(self.URL_ROOT, item)
-        return url
+        return '/results/vdown_act.php?scode=%s'%item
         
     def get(self, scode):
         '''Get results for scode timing how long it takes.'''
         address = self.URL_SOURCE(scode)
+        
+        self.ENGINE.connect(self.URL_ROOT)
         istart = time.time()
         try:
-            indata = urllib2.urlopen(address, timeout=5.0)
-            viewsdownloads = str(indata.read()).strip()
-            indata.close()
-        except urllib2.HTTPError, socket.error:
-            viewsdownloads = '0;0'
+            indata = self.ENGINE.get(address)
+            content = indata.read()
+        except EngineError:
+            content = ''
         iend = time.time()
         timetaken = iend-istart
-        return viewsdownloads, timetaken
+        self.ENGINE.close() # ignored if connection is persistent
+        
+        content = self.extract(content)
+        return content, timetaken
     
+    def extract(self, content):
+        '''Check the content for the information expected.'''
+        if not content:
+            return 'er0;er0'
+        if len(content) > 20:
+            if '404 Not Found' in content:
+                return 'nf0;nf0'
+        else:
+            return str(content).strip()
     
 class Runner(object):
     '''Runs all the available engines.'''
-    def __init__(self, saveto, sample_limit=1, pause_between=1):
+    def __init__(self, saveto, sample_limit=2, pause_between=1):
         '''Prepare to run engines and save report to file specified.'''
         self.SAMPLE_LIMIT = sample_limit
         self.PAUSE_BETWEEN = pause_between
@@ -131,7 +141,8 @@ class Runner(object):
             outfile.write(content)
         
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     report = os.path.join(os.getcwd(),'reports','summary_engines.txt') 
     r = Runner(report)
     r.run_engines()
+    
