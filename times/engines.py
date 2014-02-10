@@ -62,6 +62,8 @@ class SingleRequest(object):
         if not root:
             root = 'orastats.bodleian.ox.ac.uk'
         self.URL_ROOT = root
+        self.ENGINE.connect(self.URL_ROOT)
+        
         if source not in self.SOURCES:
             raise ValueError
         if source == 'or-static':
@@ -88,7 +90,6 @@ class SingleRequest(object):
         '''Get results for scode timing how long it takes.'''
         address = self.URL_SOURCE(scode)
         
-        self.ENGINE.connect(self.URL_ROOT)
         istart = time.time()
         try:
             indata = self.ENGINE.get(address)
@@ -183,10 +184,13 @@ class Runner(object):
         
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
+    
+    e = Engine()
+    preload1 = e.get('/results/dv/8b/0b/6cac-e205-41d9-a9f8-f0ca39f6b7eb').read()
+    preload2 = e.get('/results/dv/53/2d/3978-9c85-4dc3-a6f7-73b3bd1814f3').read()
+    #print preload1, preload2
+    
     report = os.path.join(os.getcwd(),'reports','summary_engines.txt') 
     r = Runner(report)
     r.run_engines()
-     
-    #e = Engine()
-    #print e.get('/results/dv/8b/0b/6cac-e205-41d9-a9f8-f0ca39f6b7eb').read()
-    #print e.get('/results/dv/53/2d/3978-9c85-4dc3-a6f7-73b3bd1814f3').read()
+    
