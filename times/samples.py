@@ -43,7 +43,7 @@ class SampleSet(object):
         
     def run(self):
         '''Run items against the engine getting results and time taken.'''
-        logging.info('Using engine: %s'%self.ENGINE)
+        logging.debug('Using engine: %s'%self.ENGINE)
         for item in self.ITEMS:
             istart = time.time()
             self.ITEMS[item][self.KRESULT], etime = self.ENGINE(item)
@@ -134,7 +134,7 @@ class Samples(object):
                 
     def enable(self, engine=None, name=None):
         '''Enable the engines and names for all samples.'''
-        logging.info('Using engine: %s'%engine)
+        logging.info('Engine enabled: %s'%engine)
         self.NAME = name
         for sample in self.SAMPLES:
             self.SAMPLES[sample].enable(engine, name)
