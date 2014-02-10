@@ -105,10 +105,10 @@ class SingleRequest(object):
     def extract(self, content):
         '''Check the content for the information expected.'''
         if not content:
-            return 'er0;er0'
+            return 'e0;e0'
         if len(content) > 20:
             if '404 Not Found' in content:
-                return 'nf0;nf0'
+                return 'n0;n0'
         else:
             return str(content).strip()
     
