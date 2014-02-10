@@ -65,7 +65,7 @@ class SampleSet(object):
         avetime = totaltime/len(self.ITEMS)
         self.TIME_TOTAL = '%.1f'%(totaltime)
         self.TIME_AVERAGE = '%.2f'%avetime
-        self.TIME_MINUTES = '%.0f'%(totaltime/60)
+        self.TIME_MINUTES = '%.1f'%(totaltime/60)
 
     def result(self):
         '''Return a summary of results.'''
@@ -193,8 +193,9 @@ class Samples(object):
         
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
-    number_of_samples_to_test = 1
-    s = Samples(number_of_samples_to_test)
+    number_to_test = 5
+    seconds_between = 0.1
+    s = Samples(number_to_test, seconds_between)
     s.enable() # this will use internal test engine
     s.runall()
     print s
