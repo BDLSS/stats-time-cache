@@ -1,10 +1,9 @@
 '''Run a selection of engines testing the samples.'''
 import logging
-import urllib2 # to fetch data
 import time # to time it
 import os
 import socket # to capture error
-import httplib
+import httplib  # to fetch data
 #httplib.HTTPConnection.debuglevel = 1
 
 import samples # enable the running of samples
