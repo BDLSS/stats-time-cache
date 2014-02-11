@@ -149,13 +149,13 @@ class MultipleRequest(object):
         else:
             return '/views: %s'%item
 
-    def url_downs(self, item, itemsurl=0):
+    def url_downs(self, item, baseurl):
         '''Return a URL to get download stats for item at itemsurl.'''
         params = self.shared_params()        
         params['method']='Actions.getDownload'
         
-        item = '%s%s%s'%(self.URL_ITEMS[itemsurl], item, self.URL_ITEM )
-        item = 'http://ora.ox.ac.uk/objects/uuid%3A15b86a5d-21f4-44a3-95bb-b8543d326658/datastreams/THESIS01'
+        item = '%s%s%s'%(baseurl, item, self.URL_ITEM )
+        #item = 'http://ora.ox.ac.uk/objects/uuid%3A15b86a5d-21f4-44a3-95bb-b8543d326658/datastreams/THESIS01'
         #params['downloadUrl'] = item   # Don't use this. Since Piwik
         #returns empty. It looks urlencode of "http://" is causing issues.
         
@@ -164,35 +164,42 @@ class MultipleRequest(object):
             return '/%s/index.php?%s&downloadUrl=%s'%(self.URL_SUBDIR, encoded, item)
         else:
             return '/index.php?%s&downloadUrl=%s'%(encoded, item)
+
+    def fetch(self, webpage):
+        '''Return time taken and data from webpage on a host engine.'''
+        istart = time.time()
+        try:
+            indata = self.ENGINE.get(webpage)
+            data = indata.read()
+        except EngineError:
+            data = ''
+        iend = time.time()
+        timetaken = iend-istart
+        return timetaken, data
+    
+    def get_downloads(self, scode):
+        '''Return time taken to get total downloads for scode.'''
+        totaldownloads = 100
+        totaltime = 0.0
+        for baseurl in self.URL_ITEMS:
+            url = self.url_downs(scode, baseurl)
+            timetaken, data = self.fetch(url)
+            totaltime += timetaken
+            #TODO: extract figure, use len for now.
+            totaldownloads += len(data)
+        return totaldownloads, totaltime
+    
+    def get_views(self, scode):
+        '''Return time taken to get total view for scode.'''
+        views = self.url_views(scode)
+        return len(views), 0.0
         
     def get(self, scode):
         '''Get results for scode, timing all needed requests.'''
-        views = self.url_views(scode)
-        downs = self.url_downs(scode)
-        print views 
-        print downs
-        istart = time.time()
-        try:
-            vread = '1234567890'
-            #indata = self.ENGINE.get(views)
-            #vread = indata.read()
-        except EngineError:
-            vread = ''
-        try:
-            indata = self.ENGINE.get(downs)
-            dread = indata.read()
-        except EngineError:
-            dread = ''            
-        iend = time.time()
-        timetaken = iend-istart
-        self.ENGINE.close() # ignored if connection is persistent
-        
-        content = self.extract(vread, dread)
-        return content, timetaken
-
-    def extract(self, views, downloads):
-        '''Calculates view and downloads from information supplied.'''
-        return '%s;%s'%(len(views), len(downloads))
+        views, viewtime = self.get_views(scode)
+        downloads, downtime = self.get_downloads(scode)
+        content = '%s;%s'%(views, downloads)
+        return content, viewtime+downtime
         
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
