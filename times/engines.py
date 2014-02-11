@@ -4,8 +4,10 @@ import time # to time it
 import socket # to capture error
 import httplib  # to fetch data
 #httplib.HTTPConnection.debuglevel = 1
+import urllib # so we can encode urls
 
 import samples # enable the running of samples
+import tokens # so calls to Piwik API will work
 
 class EngineError(Exception):
     pass
@@ -114,28 +116,54 @@ class MultipleRequest(object):
     '''Engine to collect results where multiple URLs are needed used.'''
     def __init__(self):
         self.URL_ROOT = ''
-        self.URL_SUBDIR = '' # enables usage if Piwik not in root dir
         self.ENGINE = Engine()
+        self.URL_SUBDIR = '' # enables usage if Piwik not in root dir
+        self.URL_ITEMS = list() # store base urls items come from
+        self.TOKEN = '' # Token need to query API
+        self.URL_ITEM = '' # The type of item to check for
     
-    def setup(self, root=None, subdir=''):
+    def setup(self, token, root=None, subdir='', item='THESIS01'):
+        self.TOKEN = token
         if not root:
             root = 'orastats.bodleian.ox.ac.uk'
         if subdir: # This will enable query of multiple Piwik installs
             self.URL_SUBDIR = subdir # on the same server.
+        self.URL_ITEMS = ('http://ora.ox.ac.uk/objects/', 'http://ora.ouls.ox.ac.uk/objects/')
+        self.URL_ITEM = '/datastreams/%s'%item # count downloads
         self.URL_ROOT = root
         self.ENGINE.connect(self.URL_ROOT)
-        
+
+    def shared_params(self):
+        params = dict()
+        params['module']='API'
+        params['token_auth']= self.TOKEN
+        params['idSite']=1
+        params['period']='year'
+        params['date']='today'
+        params['format']='json'
+        return params
+            
     def url_views(self, item):
         if self.URL_SUBDIR:
             return '/%s/views: %s'%(self.URL_SUBDIR, item)
         else:
             return '/views: %s'%item
 
-    def url_downs(self, item):
-        if self.URL_SUBDIR:
-            return '/%s/downs: %s'%(self.URL_SUBDIR, item)
+    def url_downs(self, item, itemsurl=0):
+        '''Return a URL to get download stats for item at itemsurl.'''
+        params = self.shared_params()        
+        params['method']='Actions.getDownload'
+        
+        item = '%s%s%s'%(self.URL_ITEMS[itemsurl], item, self.URL_ITEM )
+        item = 'http://ora.ox.ac.uk/objects/uuid%3A15b86a5d-21f4-44a3-95bb-b8543d326658/datastreams/THESIS01'
+        #params['downloadUrl'] = item   # Don't use this. Since Piwik
+        #returns empty. It looks urlencode of "http://" is causing issues.
+        
+        encoded = urllib.urlencode(params)
+        if self.URL_SUBDIR: # Piwik install not at root of website.
+            return '/%s/index.php?%s&downloadUrl=%s'%(self.URL_SUBDIR, encoded, item)
         else:
-            return '/downs: %s'%item
+            return '/index.php?%s&downloadUrl=%s'%(encoded, item)
         
     def get(self, scode):
         '''Get results for scode, timing all needed requests.'''
@@ -151,9 +179,8 @@ class MultipleRequest(object):
         except EngineError:
             vread = ''
         try:
-            dread = '1234'
-            #indata = self.ENGINE.get(downs)
-            #dread = indata.read()
+            indata = self.ENGINE.get(downs)
+            dread = indata.read()
         except EngineError:
             dread = ''            
         iend = time.time()
@@ -180,7 +207,7 @@ if __name__ == '__main__':
     s = SingleRequest() # start is so we can access list of sources
     source = s.SOURCES[0] # test only the first one
     s.setup(source)
-    
+
     # Run samples against engine.
     sam = samples.Samples(1, 1)
     sam.enable(s.get, source)
@@ -189,7 +216,7 @@ if __name__ == '__main__':
     
     # Test engine that needs to do multiple requests.
     m =  MultipleRequest()
-    m.setup(subdir='piwik-customvars')
+    m.setup(tokens.orastats)
     sam2 = samples.Samples(1, 1)
     sam2.enable(m.get, 'multitest')
     sam2.runall()
