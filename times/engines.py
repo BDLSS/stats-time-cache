@@ -173,7 +173,7 @@ class MultipleRequest(object):
             indata = self.ENGINE.get(webpage)
             data = indata.read()
         except EngineError:
-            data = ''
+            data = 'request_error'
         iend = time.time()
         timetaken = iend-istart
         return timetaken, data
@@ -190,10 +190,16 @@ class MultipleRequest(object):
                 results =  json.loads(data)[0] # indexerror
                 totaldownloads += results['nb_visits'] #keyerror
             except (IndexError, KeyError):
-                logging.debug('No downloads: %s'%scode)
-                logging.debug('URL: %s'%url)
-                logging.debug('Data, time taken: %s'%timetaken)
-                logging.debug(str(data))                
+                check = str(data)
+                if check == '[]': # Piwik okay, but has no data
+                    logging.debug('No downloads: %s'%scode) 
+                elif check == 'request_error':
+                    logging.warn('Request issue: %s'%scode)
+                else:
+                    logging.warn('Unknown issue: %s'%scode)
+                    logging.debug('URL: %s'%url)
+                    logging.debug('Data, time taken: %s'%timetaken)
+                    logging.debug(check)                
         return totaldownloads, totaltime
     
     def get_views(self, scode):
