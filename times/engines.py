@@ -5,6 +5,7 @@ import socket # to capture error
 import httplib  # to fetch data
 #httplib.HTTPConnection.debuglevel = 1
 import urllib # so we can encode urls
+import json
 
 import samples # enable the running of samples
 import tokens # so calls to Piwik API will work
@@ -185,8 +186,11 @@ class MultipleRequest(object):
             url = self.url_downs(scode, baseurl)
             timetaken, data = self.fetch(url)
             totaltime += timetaken
-            #TODO: extract figure, use len for now.
-            totaldownloads += len(data)
+            try: # If data is missing either of these cause key errors
+                results =  json.loads(data)[0]
+                totaldownloads += results['nb_visits']
+            except KeyError:
+                pass
         return totaldownloads, totaltime
     
     def get_views(self, scode):
