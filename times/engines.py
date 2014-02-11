@@ -188,9 +188,9 @@ class MultipleRequest(object):
             timetaken, data = self.fetch(url)
             totaltime += timetaken
             try:
-                results =  json.loads(data)[0] # indexerror
+                results =  json.loads(data)[0] # indexerror(list), valueerror(json)
                 totalresult += results[countid] #keyerror
-            except (IndexError, KeyError):
+            except (IndexError, KeyError, ValueError):
                 check = str(data)
                 if check == '[]': # Piwik okay, but has no data
                     logging.debug('No %s data: %s'%(category, scode)) 
