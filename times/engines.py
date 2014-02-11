@@ -144,28 +144,29 @@ class MultipleRequest(object):
         params['format']='json'
         return params
             
-    def url_views(self, item):
-        if self.URL_SUBDIR:
-            return '/%s/views: %s'%(self.URL_SUBDIR, item)
-        else:
-            return '/views: %s'%item
-
-    def url_downs(self, item, baseurl):
-        '''Return a URL to get download stats for item at itemsurl.'''
+    def url_generic(self, item, baseurl, category='downloads'):
+        '''Return a URL to get category stats for item at baseurl.'''
         params = self.shared_params()        
-        params['method']='Actions.getDownload'
-        
-        item = '%s%s%s'%(baseurl, item, self.URL_ITEM )
-        #item = 'http://ora.ox.ac.uk/objects/uuid%3A15b86a5d-21f4-44a3-95bb-b8543d326658/datastreams/THESIS01'
-        #params['downloadUrl'] = item   # Don't use this. Since Piwik
-        #returns empty. It looks urlencode of "http://" is causing issues.
-        
+        if category == 'downloads':
+            params['method']='Actions.getDownload'
+            item = '%s%s%s'%(baseurl, item, self.URL_ITEM )
+            #item = 'http://ora.ox.ac.uk/objects/uuid%3A15b86a5d-21f4-44a3-95bb-b8543d326658/datastreams/THESIS01'
+            #params['downloadUrl'] = item   # Don't use this. Since Piwik
+            #returns empty. It looks urlencode of "http://" is causing issues.
+            urlcat = 'downloadUrl'
+        else:
+            params['method']='Actions.getPageUrl'
+            item = '%s%s'%(baseurl, item )
+            #item = 'http://ora.ox.ac.uk/objects/uuid%3A15b86a5d-21f4-44a3-95bb-b8543d326658'
+            urlcat = 'pageUrl'
         encoded = urllib.urlencode(params)
         if self.URL_SUBDIR: # Piwik install not at root of website.
-            return '/%s/index.php?%s&downloadUrl=%s'%(self.URL_SUBDIR, encoded, item)
+            url = '/%s/index.php?%s&%s=%s'%(self.URL_SUBDIR, encoded, urlcat, item)
         else:
-            return '/index.php?%s&downloadUrl=%s'%(encoded, item)
-
+            url = '/index.php?%s&%s=%s'%(encoded, urlcat, item)
+        logging.debug(url)
+        return url
+    
     def fetch(self, webpage):
         '''Return time taken and data from webpage on a host engine.'''
         istart = time.time()
@@ -178,21 +179,21 @@ class MultipleRequest(object):
         timetaken = iend-istart
         return timetaken, data
     
-    def get_downloads(self, scode):
-        '''Return time taken to get total downloads for scode.'''
-        totaldownloads = 100
+    def get_generic(self, scode, category, countid='nb_visits'):
+        '''Return time taken to get category countid totals for scode.'''
+        totalresult = 0
         totaltime = 0.0
         for baseurl in self.URL_ITEMS:
-            url = self.url_downs(scode, baseurl)
+            url = self.url_generic(scode, baseurl, category)
             timetaken, data = self.fetch(url)
             totaltime += timetaken
             try:
                 results =  json.loads(data)[0] # indexerror
-                totaldownloads += results['nb_visits'] #keyerror
+                totalresult += results[countid] #keyerror
             except (IndexError, KeyError):
                 check = str(data)
                 if check == '[]': # Piwik okay, but has no data
-                    logging.debug('No downloads: %s'%scode) 
+                    logging.debug('No %s data: %s'%(category, scode)) 
                 elif check == 'request_error':
                     logging.warn('Request issue: %s'%scode)
                 else:
@@ -200,12 +201,15 @@ class MultipleRequest(object):
                     logging.debug('URL: %s'%url)
                     logging.debug('Data, time taken: %s'%timetaken)
                     logging.debug(check)                
-        return totaldownloads, totaltime
+        return totalresult, totaltime
+    
+    def get_downloads(self, scode):
+        '''Return time taken to get total downloads for scode.'''
+        return self.get_generic(scode, 'downloads', 'nb_visits')
     
     def get_views(self, scode):
-        '''Return time taken to get total view for scode.'''
-        views = self.url_views(scode)
-        return len(views), 0.0
+        '''Return time taken to get total views for scode.'''
+        return self.get_generic(scode, 'views', 'nb_hits')
         
     def get(self, scode):
         '''Get results for scode, timing all needed requests.'''
