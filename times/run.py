@@ -5,6 +5,7 @@ import time
 
 import engines # how results are obtained
 import samples # what results are needed
+import tokens # for multiple engines
 
 class Runner(object):
     '''Runs all the available engines.'''
@@ -22,6 +23,7 @@ class Runner(object):
         self.save(header=True)
 
         self.run_engines_single()
+        self.run_engines_multiple()
         
         self.log('%s\nEnd for report.\n%s\n'%(self.DIV1, self.DIV1))
         self.save()
@@ -48,6 +50,42 @@ class Runner(object):
             self.RESULT = list()
             time.sleep(self.PAUSE_BETWEEN)
     
+    def multiple_sources(self):
+        '''Return a tuple of of which multiple sources to test.'''
+        return (#(name, ip address, subdir on website),
+                ('orastats', tokens.orastats, tokens.orastatsip, ''),
+                #('vm-default', tokens.default_config, tokens.vm_ip, 'default_piwik'),
+                #('vm-bigarch', tokens.big_archives, tokens.vm_ip, 'bigarchives_piwik'),
+                #('vm-indexed', tokens.indexed_links, tokens.vm_ip, 'indexed_piwik')
+                   )
+        
+    def run_engines_multiple(self):
+        '''Run engines that need to get data with a multiple requests.'''
+        sources = self.multiple_sources()
+        for source in sources:
+            name = source[0]
+            token = source[1]
+            root = source[2]
+            subdir = source[3]
+            logging.info('Running engine: %s'%name) 
+            self.log('\n%s\n%s\n'%(name, self.DIV2))
+            self.log(self.report_time('Start: '))
+            
+            multi = engines.MultipleRequest()
+            multi.setup(token, root, subdir)
+            sam = samples.Samples(self.SAMPLE_LIMIT, 1)
+            sam.enable(multi.get, name)
+            sam.runall()
+            sam.save()
+            
+            self.log(self.report_time('Finish: '))
+            self.log('%s\n'%self.DIV2)
+            self.log(sam.summary_table())
+            self.log('\n%s\n\n'%self.DIV2)
+            self.save()
+            self.RESULT = list()
+            time.sleep(self.PAUSE_BETWEEN)
+        
     def report_time(self, prefix=''):
         when = time.strftime('%y-%m-%d at %H:%M:%S', time.gmtime())
         return '%s%s\n'%(prefix, when)
