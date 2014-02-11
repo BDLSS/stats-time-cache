@@ -197,28 +197,33 @@ class MultipleRequest(object):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     
+    TEST_SINGLE = False
+    TEST_MULTIPLE = True
+    
     # Check URL read is working.
     e = Engine()
     preload1 = e.get('/results/dv/8b/0b/6cac-e205-41d9-a9f8-f0ca39f6b7eb').read()
     preload2 = e.get('/results/dv/53/2d/3978-9c85-4dc3-a6f7-73b3bd1814f3').read()
     print preload1.strip(), preload2.strip()
     
-    # Setup the engine to use.
-    s = SingleRequest() # start is so we can access list of sources
-    source = s.SOURCES[0] # test only the first one
-    s.setup(source)
+    if TEST_SINGLE:
+        # Setup the engine to use.
+        s = SingleRequest() # start is so we can access list of sources
+        source = s.SOURCES[0] # test only the first one
+        s.setup(source)
 
-    # Run samples against engine.
-    sam = samples.Samples(1, 1)
-    sam.enable(s.get, source)
-    sam.runall()
-    print sam.result()
+        # Run samples against engine.
+        sam = samples.Samples(1, 1)
+        sam.enable(s.get, source)
+        sam.runall()
+        print sam.result()
     
-    # Test engine that needs to do multiple requests.
-    m =  MultipleRequest()
-    m.setup(tokens.orastats)
-    sam2 = samples.Samples(1, 1)
-    sam2.enable(m.get, 'multitest')
-    sam2.runall()
-    print sam2.result()
-    
+    if TEST_MULTIPLE:
+        # Test engine that needs to do multiple requests.
+        m =  MultipleRequest()
+        m.setup(tokens.orastats)
+        sam2 = samples.Samples(1, 1)
+        sam2.enable(m.get, 'multitest')
+        sam2.runall()
+        print sam2.result()
+        
