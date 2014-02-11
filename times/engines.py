@@ -186,11 +186,14 @@ class MultipleRequest(object):
             url = self.url_downs(scode, baseurl)
             timetaken, data = self.fetch(url)
             totaltime += timetaken
-            try: # If data is missing either of these cause key errors
-                results =  json.loads(data)[0]
-                totaldownloads += results['nb_visits']
-            except KeyError:
-                pass
+            try:
+                results =  json.loads(data)[0] # indexerror
+                totaldownloads += results['nb_visits'] #keyerror
+            except (IndexError, KeyError):
+                logging.debug('No downloads: %s'%scode)
+                logging.debug('URL: %s'%url)
+                logging.debug('Data, time taken: %s'%timetaken)
+                logging.debug(str(data))                
         return totaldownloads, totaltime
     
     def get_views(self, scode):
