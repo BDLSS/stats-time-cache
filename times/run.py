@@ -53,8 +53,7 @@ class Runner(object):
     def multiple_sources(self):
         '''Return a tuple of of which multiple sources to test.'''
         ms = sources.PiwiEngines()
-        ms.enable_localvm()
-        return ms.SOURCES
+        return ms.get_sources()
         
     def run_engines_multiple(self):
         '''Run engines that need to get data with a multiple requests.'''

@@ -28,6 +28,10 @@ class PiwiEngines():
         token = 'YOUR TOKEN' 
         self.add('pi_noarchives', token, ipaddress)
 
+    def get_sources(self):
+        self.enable_localvm()
+        return self.SOURCES
+        
     def __str__(self):
         return str(self.SOURCES)
     
