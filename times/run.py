@@ -5,7 +5,7 @@ import time
 
 import engines # how results are obtained
 import samples # what results are needed
-import tokens # for multiple engines
+import sources # for multiple engines
 
 class Runner(object):
     '''Runs all the available engines.'''
@@ -52,12 +52,9 @@ class Runner(object):
     
     def multiple_sources(self):
         '''Return a tuple of of which multiple sources to test.'''
-        return (#(name, ip address, subdir on website),
-                ('orastats', tokens.orastats, tokens.orastatsip, ''),
-                #('vm-default', tokens.default_config, tokens.vm_ip, 'default_piwik'),
-                #('vm-bigarch', tokens.big_archives, tokens.vm_ip, 'bigarchives_piwik'),
-                #('vm-indexed', tokens.indexed_links, tokens.vm_ip, 'indexed_piwik')
-                   )
+        ms = sources.PiwiEngines()
+        ms.enable_localvm()
+        return ms.SOURCES
         
     def run_engines_multiple(self):
         '''Run engines that need to get data with a multiple requests.'''
