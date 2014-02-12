@@ -1,3 +1,4 @@
+#!/bin/bash
 # A script to help migration of data from an old server with an old version
 # of Piwik to a new server and enable migration to newer versions of Piwik.
 #
@@ -86,7 +87,7 @@ echo "When prompted you need to use the password on the local server."
 
 echo "Uncompressing and moving to webserver folder."
 echo "When prompted you need to use the password on the local server."
-webname="test1_piwik"
+webname="$dbname"
 webroot="/var/www"
 webpath="$webroot/$webname"
 unzip -q -d $workdir $workdir/$piwname
