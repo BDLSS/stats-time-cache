@@ -25,6 +25,7 @@ class PiwiEngines():
         self.enable_noarchives(ipaddress)
         self.enable_archives(ipaddress)
         self.enable_customvars(ipaddress)
+        self.enable_indexed(ipaddress)
         
     def enable_noarchives(self, ipaddress):
         token = 'YOUR TOKEN' 
@@ -35,6 +36,10 @@ class PiwiEngines():
         self.add('pi_archives', token, ipaddress)
         
     def enable_customvars(self, ipaddress):
+        token = 'YOUR TOKEN' 
+        self.add('pi_customvars', token, ipaddress)
+        
+    def enable_indexed(self, ipaddress):
         token = 'YOUR TOKEN' 
         self.add('pi_customvars', token, ipaddress)
 
