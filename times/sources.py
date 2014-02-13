@@ -23,10 +23,20 @@ class PiwiEngines():
     def enable_localvm(self):
         ipaddress = '192.168.0.5'
         self.enable_noarchives(ipaddress)
+        self.enable_archives(ipaddress)
+        self.enable_customvars(ipaddress)
         
     def enable_noarchives(self, ipaddress):
         token = 'YOUR TOKEN' 
         self.add('pi_noarchives', token, ipaddress)
+        
+    def enable_archives(self, ipaddress):
+        token = 'YOUR TOKEN' 
+        self.add('pi_archives', token, ipaddress)
+        
+    def enable_customvars(self, ipaddress):
+        token = 'YOUR TOKEN' 
+        self.add('pi_customvars', token, ipaddress)
 
     def get_sources(self):
         self.enable_localvm()
