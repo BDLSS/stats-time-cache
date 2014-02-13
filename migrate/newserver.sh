@@ -83,10 +83,6 @@ wget -P $workdir http://builds.piwik.org/$piwname
 
 echo "Uncompressing and moving to webserver folder."
 echo "When prompted you need to use the password on the local server."
-
-
-echo "Uncompressing and moving to webserver folder."
-echo "When prompted you need to use the password on the local server."
 webname="$dbname"
 webroot="/var/www"
 webpath="$webroot/$webname"
