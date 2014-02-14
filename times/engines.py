@@ -190,8 +190,8 @@ class MultipleRequest(object):
             timetaken, data = self.fetch(url)
             totaltime += timetaken
             totalresult += self.extract_total(data, countid)
-        logging.debug('Total: %s\t%s'%(totalresult, scode))
-        logging.debug('Time: %s\t%s'%(totalresult, scode))
+        logging.debug('Total found: %s\t%s'%(totalresult, scode))
+        logging.debug('Time taken: %s\t%s'%(totaltime, scode))
         return totalresult, totaltime
     
     def extract_total(self, data, field):
