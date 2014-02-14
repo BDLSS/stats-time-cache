@@ -167,6 +167,7 @@ class MultipleRequest(object):
         else:
             url = '/index.php?%s&%s=%s'%(encoded, urlcat, item)
         logging.debug(url)
+        
         return url
     
     def fetch(self, webpage):
@@ -189,15 +190,24 @@ class MultipleRequest(object):
             url = self.url_generic(scode, baseurl, category)
             timetaken, data = self.fetch(url)
             totaltime += timetaken
-            totalresult += self.extract_total(data, countid)
+            totalresult += self.extract_total(data, countid, scode)
         logging.debug('Total found: %s\t%s'%(totalresult, scode))
         logging.debug('Time taken: %s\t%s'%(totaltime, scode))
         return totalresult, totaltime
     
-    def extract_total(self, data, field):
+    def extract_total(self, data, field, scode):
         '''Sum the field from all points (ie. years) in the data.'''
         total = 0
-        dpoints = json.loads(data)
+        try:
+            dpoints = json.loads(data)
+        except ValueError:
+            check = str(data)
+            if check == '[]': # Piwik okay, but has no data
+                logging.debug('Piwik okay, no data: %s'%scode) 
+            elif check == 'request_error':
+                logging.warn('Request issue: %s'%scode)
+            return total
+    
         for point  in dpoints:
             try:
                 for period in dpoints[point]:
