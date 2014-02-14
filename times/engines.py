@@ -189,12 +189,12 @@ class MultipleRequest(object):
             url = self.url_generic(scode, baseurl, category)
             timetaken, data = self.fetch(url)
             totaltime += timetaken
-            totalresult += self.extract_total(data)
+            totalresult += self.extract_total(data, countid)
         logging.debug('Total: %s\t%s'%(totalresult, scode))
         logging.debug('Time: %s\t%s'%(totalresult, scode))
         return totalresult, totaltime
     
-    def extract_total(self, data, field='nb_visits'):
+    def extract_total(self, data, field):
         '''Sum the field from all points (ie. years) in the data.'''
         total = 0
         dpoints = json.loads(data)
