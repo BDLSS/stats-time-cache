@@ -122,6 +122,8 @@ class MultipleRequest(object):
         self.URL_ITEMS = list() # store base urls items come from
         self.TOKEN = '' # Token need to query API
         self.URL_ITEM = '' # The type of item to check for
+        self.QUERY_PERIOD = 'year'
+        self.QUERY_DATE = 'last5'
     
     def setup(self, token, root=None, subdir='', item='THESIS01'):
         self.TOKEN = token
@@ -139,8 +141,8 @@ class MultipleRequest(object):
         params['module']='API'
         params['token_auth']= self.TOKEN
         params['idSite']=1
-        params['period']='year'
-        params['date']='today'
+        params['period'] = self.QUERY_PERIOD
+        params['date'] = self.QUERY_DATE
         params['format']='json'
         return params
             
@@ -187,22 +189,23 @@ class MultipleRequest(object):
             url = self.url_generic(scode, baseurl, category)
             timetaken, data = self.fetch(url)
             totaltime += timetaken
-            try:
-                results =  json.loads(data)[0] # indexerror(list), valueerror(json)
-                totalresult += results[countid] #keyerror
-            except (IndexError, KeyError, ValueError):
-                check = str(data)
-                if check == '[]': # Piwik okay, but has no data
-                    logging.debug('No %s data: %s'%(category, scode)) 
-                elif check == 'request_error':
-                    logging.warn('Request issue: %s'%scode)
-                else:
-                    logging.warn('Unknown issue: %s'%scode)
-                    logging.debug('URL: %s'%url)
-                    logging.debug('Data, time taken: %s'%timetaken)
-                    logging.debug(check)                
+            totalresult += self.extract_total(data)
+        logging.debug('Total: %s\t%s'%(totalresult, scode))
+        logging.debug('Time: %s\t%s'%(totalresult, scode))
         return totalresult, totaltime
     
+    def extract_total(self, data, field='nb_visits'):
+        '''Sum the field from all points (ie. years) in the data.'''
+        total = 0
+        dpoints = json.loads(data)
+        for point  in dpoints:
+            try:
+                for period in dpoints[point]:
+                    total += period[field]
+            except IndexError:
+                logging.debug('extract_total_failed: %s'%period) 
+        return total
+                
     def get_downloads(self, scode):
         '''Return time taken to get total downloads for scode.'''
         return self.get_generic(scode, 'downloads', 'nb_visits')
