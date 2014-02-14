@@ -6,8 +6,11 @@ class PiwiEngines():
     
     def add(self, name, token, ipaddress, subdir=None):
         '''Add named engine with token and IP address.'''
-        if not subdir: # assume subdir matches name
+        if subdir == 'root':
+            subdir = ''
+        elif not subdir: # assume subdir matches name
             subdir = name
+        
         source = (name, token, ipaddress, subdir)
         self.SOURCES.append(source)
 
@@ -18,33 +21,19 @@ class PiwiEngines():
     def enable_orastats(self):
         ipaddress = 'THE IP'
         token = 'YOUR TOKEN'
-        self.add('orastats', token, ipaddress) 
+        self.add('orastats', token, ipaddress, 'root') 
 
     def enable_localvm(self):
-        ipaddress = '192.168.0.5'
-        self.enable_noarchives(ipaddress)
-        self.enable_archives(ipaddress)
-        self.enable_customvars(ipaddress)
-        self.enable_indexed(ipaddress)
-        
-    def enable_noarchives(self, ipaddress):
-        token = 'YOUR TOKEN' 
-        self.add('pi_noarchives', token, ipaddress)
-        
-    def enable_archives(self, ipaddress):
-        token = 'YOUR TOKEN' 
+        ipaddress = 'THE IP'
+        token = 'YOUR TOKEN'
+        self.add('pi_noarchives', token, ipaddress) 
         self.add('pi_archives', token, ipaddress)
-        
-    def enable_customvars(self, ipaddress):
-        token = 'YOUR TOKEN' 
         self.add('pi_customvars', token, ipaddress)
-        
-    def enable_indexed(self, ipaddress):
-        token = 'YOUR TOKEN' 
         self.add('pi_customvars', token, ipaddress)
 
     def get_sources(self):
         self.enable_localvm()
+        self.enable_orastats()
         return self.SOURCES
         
     def __str__(self):
