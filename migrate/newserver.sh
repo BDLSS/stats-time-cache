@@ -37,7 +37,7 @@ echo "1a. Fetching backup from existing database."
 user="USERNAME ON SERVER"
 server="orastats.bodleian.ox.ac.uk"
 spath="/opt/statmaker/export/"
-filename="orastatspiwik.sql"
+filename="statspiwik.sql"
 echo "When prompted you need to enter the password on the remote server."
 scp $user@$server:$spath/$filename.bz2 $workdir/$filename.bz2
 
