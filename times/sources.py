@@ -4,14 +4,15 @@ class PiwiEngines():
     def __init__(self):
         self.SOURCES = list()
     
-    def add(self, name, token, ipaddress, subdir=None):
+    def add(self, name, token, ipaddress, subdir=None, query='last5years'):
         '''Add named engine with token and IP address.'''
         if subdir == 'root':
             subdir = ''
         elif not subdir: # assume subdir matches name
             subdir = name
-        
-        source = (name, token, ipaddress, subdir)
+        if query not in ['last5years', 'last12months']:
+            query = 'last5years'
+        source = (name, token, ipaddress, subdir, query)
         self.SOURCES.append(source)
 
     def enable_all(self):

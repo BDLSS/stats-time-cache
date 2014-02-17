@@ -125,12 +125,16 @@ class MultipleRequest(object):
         self.QUERY_PERIOD = 'year'
         self.QUERY_DATE = 'last5'
     
-    def setup(self, token, root=None, subdir='', item='THESIS01'):
+    def setup(self, token, root=None, subdir='', item='THESIS01', query='last5years'):
         self.TOKEN = token
         if not root:
             root = 'orastats.bodleian.ox.ac.uk'
         if subdir: # This will enable query of multiple Piwik installs
             self.URL_SUBDIR = subdir # on the same server.
+        if query == 'last12months':
+            self.QUERY_PERIOD = 'month'
+            self.QUERY_DATE = 'last12'
+            
         self.URL_ITEMS = ('http://ora.ox.ac.uk/objects/', 'http://ora.ouls.ox.ac.uk/objects/')
         self.URL_ITEM = '/datastreams/%s'%item # count downloads
         self.URL_ROOT = root
