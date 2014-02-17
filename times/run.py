@@ -22,7 +22,7 @@ class Runner(object):
         '''Run all the available engines.'''
         self.save(header=True)
 
-        self.run_engines_single()
+        #self.run_engines_single()
         self.run_engines_multiple()
         
         self.log('%s\nEnd for report.\n%s\n'%(self.DIV1, self.DIV1))
@@ -58,7 +58,9 @@ class Runner(object):
     def run_engines_multiple(self):
         '''Run engines that need to get data with a multiple requests.'''
         sources = self.multiple_sources()
+        autosort = 10
         for source in sources:
+            autosort += 1
             name = source[0]
             token = source[1]
             root = source[2]
@@ -71,7 +73,7 @@ class Runner(object):
             multi = engines.MultipleRequest()
             multi.setup(token, root, subdir, query)
             sam = samples.Samples(self.SAMPLE_LIMIT, 1)
-            sam.enable(multi.get, name)
+            sam.enable(multi.get, 's%s_%s'%(autosort,name))
             sam.runall()
             sam.save()
             
