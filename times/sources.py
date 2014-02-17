@@ -28,7 +28,7 @@ class PiwiEngines():
         token = 'YOUR TOKEN'
         self.add('pi_noarchives', token, ipaddress) 
         self.add('pi_archives', token, ipaddress)
-        self.add('pi_customvars', token, ipaddress)
+        self.add('pi_bigarchives', token, ipaddress)
         self.add('pi_customvars', token, ipaddress)
 
     def get_sources(self):
