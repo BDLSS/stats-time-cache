@@ -64,7 +64,7 @@ class SampleSet(object):
             totaltime += self.ITEMS[item][self.KTOOK]
         avetime = totaltime/len(self.ITEMS)
         self.TIME_TOTAL = '%.1f'%(totaltime)
-        self.TIME_AVERAGE = '%.2f'%avetime
+        self.TIME_AVERAGE = '%.3f'%avetime
         self.TIME_MINUTES = '%.1f'%(totaltime/60)
 
     def result(self):
@@ -176,11 +176,13 @@ class Samples(object):
             answer.append(self.summary_sample(sample))
         return '\n'.join(answer)
     
-    def summary_sample(self, sample):
+    def summary_sample(self, sample, altname=''):
         t = self.SAMPLES[sample].TIME_TOTAL
         a = self.SAMPLES[sample].TIME_AVERAGE
         m = self.SAMPLES[sample].TIME_MINUTES
-        return '%s\t%s\t%s\t%s'%(m, t, a , sample)
+        if altname: # make it so last column content can vary
+            sample = altname
+        return '%s\t%s\t%s\t%s'%(m, t, a, sample)
         
     def save(self):
         '''Save a summary of results for all samples.'''
