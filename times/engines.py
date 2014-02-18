@@ -97,9 +97,13 @@ class SingleRequest(object):
         return url
     
     def url_vdown(self, item):
+        if self.SINGLE_SCODE: # always use the same item
+            item = self.SINGLE_SCODE
         return '/results/vdown.php?scode=%s'%item
         
     def url_indexed(self, item):
+        if self.SINGLE_SCODE: # always use the same item
+            item = self.SINGLE_SCODE
         return '/results/vdown_act.php?scode=%s'%item
         
     def get(self, scode):
