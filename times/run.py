@@ -23,6 +23,12 @@ class Runner(object):
         '''Run all the available engines.'''
         self.save(header=True)
 
+        # prepare storage for the report by sample
+        sam = samples.Samples(self.SAMPLE_LIMIT, 1)
+        for sample in sam.SAMPLES:
+            self.REPORT_BY_SAMPLE[sample] = list()
+        del(sam)
+        
         self.run_engines_single(testitem)
         self.run_engines_multiple(testitem)
         self.final_result()
@@ -37,11 +43,6 @@ class Runner(object):
         
     def run_engines_single(self, testitem):
         '''Run engines that can get data with a single request.'''
-        sam = samples.Samples(self.SAMPLE_LIMIT, 1)
-        for sample in sam.SAMPLES:
-            self.REPORT_BY_SAMPLE[sample] = list()
-        del(sam)
-            
         singles  = engines.SingleRequest()
         for source in singles.SOURCES:
             logging.info('Running engine: %s'%source) 
