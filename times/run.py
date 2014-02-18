@@ -22,13 +22,13 @@ class Runner(object):
         '''Run all the available engines.'''
         self.save(header=True)
 
-        #self.run_engines_single()
+        self.run_engines_single(testitem)
         self.run_engines_multiple(testitem)
         
         self.log('%s\nEnd for report.\n%s\n'%(self.DIV1, self.DIV1))
         self.save()
         
-    def run_engines_single(self):
+    def run_engines_single(self, testitem):
         '''Run engines that can get data with a single request.'''
         singles  = engines.SingleRequest()
         for source in singles.SOURCES:
@@ -36,7 +36,7 @@ class Runner(object):
             self.log('\n%s\n%s\n'%(source, self.DIV2))
             self.log(self.report_time('Start: '))
             
-            singles.setup(source)
+            singles.setup(source, singlecode=testitem)
             sam = samples.Samples(self.SAMPLE_LIMIT, 1)
             sam.enable(singles.get, source)
             sam.runall()

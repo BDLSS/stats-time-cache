@@ -56,13 +56,25 @@ class SingleRequest(object):
         self.URL_SOURCE = None # This will point to a method for calling
         self.SOURCES = ['or-static', 'or-vdown', 'or-indexed']
         self.ENGINE = Engine()
+        
+        # This code will be used for all get requests if enabled.
+        self.SINGLE_SCODE = ''
     
-    def setup(self, source, root=None):
+    def setup(self, source, root=None, singlecode=''):
         '''Source controls how the URL is combined with root url.'''
         if not root:
             root = 'orastats.bodleian.ox.ac.uk'
         self.URL_ROOT = root
         self.ENGINE.connect(self.URL_ROOT)
+
+        if singlecode: # Get request will always use this code
+            if singlecode == 'rowan': # Use Rowan test case
+                logging.warn('Using Rowan test case, ignore UUIDs in results.')
+                self.SINGLE_SCODE = 'uuid:15b86a5d-21f4-44a3-95bb-b8543d326658'
+            else: # Use custom
+                logging.warn('Using custom test case, ignore UUIDs in results.')
+                self.SINGLE_SCODE = singlecode
+                logging.debug('Test case: %s'%singlecode)
         
         if source not in self.SOURCES:
             raise ValueError
@@ -75,10 +87,14 @@ class SingleRequest(object):
         
     def url_static(self, item):
         '''Return the URL pattern for fetching data.'''
+        if self.SINGLE_SCODE: # always use the same item
+            item = self.SINGLE_SCODE
         d1 = item[5:7] # skip 'uuid:' and get first 2 chars 
         d2 = item[7:9] # directory level 2 is the next 2 chars
         fname = item[9:] # the filename is the rest of the uuid
-        return '/results/dv/%s/%s/%s'%(d1,d2,fname)
+        url = '/results/dv/%s/%s/%s'%(d1,d2,fname)
+        logging.debug('Get url: %s'%url)
+        return url
     
     def url_vdown(self, item):
         return '/results/vdown.php?scode=%s'%item
