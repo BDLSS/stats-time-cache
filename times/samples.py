@@ -173,13 +173,15 @@ class Samples(object):
         answer = list()
         answer.append('TMins\tTSecs\tTAverage\tSample')
         for sample in sorted(self.SAMPLES):
-            t = self.SAMPLES[sample].TIME_TOTAL
-            a = self.SAMPLES[sample].TIME_AVERAGE
-            m = self.SAMPLES[sample].TIME_MINUTES
-            line = '%s\t%s\t%s\t%s'%(m, t, a , sample)
-            answer.append(line)
+            answer.append(self.summary_sample(sample))
         return '\n'.join(answer)
     
+    def summary_sample(self, sample):
+        t = self.SAMPLES[sample].TIME_TOTAL
+        a = self.SAMPLES[sample].TIME_AVERAGE
+        m = self.SAMPLES[sample].TIME_MINUTES
+        return '%s\t%s\t%s\t%s'%(m, t, a , sample)
+        
     def save(self):
         '''Save a summary of results for all samples.'''
         if not self.NAME:
