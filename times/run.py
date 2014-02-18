@@ -17,6 +17,7 @@ class Runner(object):
         self.DIV1 = '='*50
         self.DIV2 = '-'*50
         self.REPORT_SAVE = saveto
+        self.REPORT_BY_SAMPLE = dict()
         
     def run_engines(self, testitem=[]):
         '''Run all the available engines.'''
@@ -24,12 +25,23 @@ class Runner(object):
 
         self.run_engines_single(testitem)
         self.run_engines_multiple(testitem)
-        
-        self.log('%s\nEnd for report.\n%s\n'%(self.DIV1, self.DIV1))
+        self.final_result()
+    
+    def final_result(self):
+        '''Finish the results output.'''
+        self.RESULT += '%s\nEnd summary.\n%s\n'%(self.DIV1, self.DIV1)
+        self.RESULT += '\n%s\nResults by samples.\n%s\n\n'%(self.DIV1, self.DIV1)
+        self.RESULT += self.report_samples()
+        self.RESULT += '\n%s\nEnd results.\n%s\n'%(self.DIV1, self.DIV1)
         self.save()
         
     def run_engines_single(self, testitem):
         '''Run engines that can get data with a single request.'''
+        sam = samples.Samples(self.SAMPLE_LIMIT, 1)
+        for sample in sam.SAMPLES:
+            self.REPORT_BY_SAMPLE[sample] = list()
+        del(sam)
+            
         singles  = engines.SingleRequest()
         for source in singles.SOURCES:
             logging.info('Running engine: %s'%source) 
@@ -42,14 +54,18 @@ class Runner(object):
             sam.runall()
             sam.save()
             
+            for sample in sam.SAMPLES: # put samples together
+                content = sam.summary_sample(sample, source)
+                self.REPORT_BY_SAMPLE[sample].append(content)
+            
             self.log(self.report_time('Finish: '))
             self.log('%s\n'%self.DIV2)
             self.log(sam.summary_table())
-            self.log('\n%s\n\n'%self.DIV2)
+            self.log('\n%s\n'%self.DIV2)
             self.save()
             self.RESULT = list()
             time.sleep(self.PAUSE_BETWEEN)
-    
+        
     def multiple_sources(self):
         '''Return a tuple of of which multiple sources to test.'''
         ms = sources.PiwiEngines()
@@ -80,7 +96,7 @@ class Runner(object):
             self.log(self.report_time('Finish: '))
             self.log('%s\n'%self.DIV2)
             self.log(sam.summary_table())
-            self.log('\n%s\n\n'%self.DIV2)
+            self.log('\n%s\n'%self.DIV2)
             self.save()
             self.RESULT = list()
             time.sleep(self.PAUSE_BETWEEN)
@@ -89,10 +105,21 @@ class Runner(object):
         when = time.strftime('%y-%m-%d at %H:%M:%S', time.gmtime())
         return '%s%s\n'%(prefix, when)
     
+    def report_samples(self):
+        '''Return a string that collates a sample for all test runs.'''
+        result = list()
+        for sample in self.REPORT_BY_SAMPLE:
+            result.append(sample)
+            result.append('TMins\tTSecs\tTAverage\tTest run')
+            for part in self.REPORT_BY_SAMPLE[sample]:
+                result.append(part)
+            result.append('')
+        return '\n'.join(result)
+        
     def log(self, message):
         self.RESULT.append(message)
     
-    def save(self, header=False):
+    def save(self, header=False, content=''):
         '''Save a report of this run to the filepath.'''
         if header:
             fmode= 'w'
@@ -102,12 +129,12 @@ class Runner(object):
             content += '-For a small sample time in seconds is a better measure.\n'
             content += '-Average time to get results for each item in sample.\n'
             content += '-The name of the sample contains the sample size.\n'
-            content += '%s\n%s\n'%(self.DIV1,self.report_time('Generated: '))
+            content += '%s\n%s'%(self.DIV1,self.report_time('Generated: '))
         else:
             fmode = 'a'
-            content = ''
-            for report in self.RESULT:
-                content += report
+            if not content: 
+                for report in self.RESULT:
+                    content += report
         
         with file(self.REPORT_SAVE, fmode) as outfile:
             outfile.write(content)
@@ -135,6 +162,6 @@ if __name__ == '__main__':
     print preload1.strip(), preload2.strip()
     
     report = os.path.join(os.getcwd(),'reports','summary_engines.txt') 
-    r = Runner(report)
+    r = Runner(report, 2)
     r.run_engines('rowan')
     
