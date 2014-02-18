@@ -124,8 +124,15 @@ class MultipleRequest(object):
         self.URL_ITEM = '' # The type of item to check for
         self.QUERY_PERIOD = 'year'
         self.QUERY_DATE = 'last5'
+        
+        # Enable test of multiple engines using an item known to
+        # work. Also, since the same GET request is done multiple
+        # times it will check the effects of any caches that exist.
+        self.SINGLE_VIEWS = None # Get views for this URL
+        self.SINGLE_DOWNS = None # Get downloads for this URL
     
-    def setup(self, token, root=None, subdir='', item='THESIS01', query='last5years'):
+    def setup(self, token, root=None, subdir='', item='THESIS01',
+              query='last5years', singles=[]):
         self.TOKEN = token
         if not root:
             root = 'orastats.bodleian.ox.ac.uk'
@@ -134,6 +141,18 @@ class MultipleRequest(object):
         if query == 'last12months':
             self.QUERY_PERIOD = 'month'
             self.QUERY_DATE = 'last12'
+        
+        if singles: # Get request will always use these.
+            if singles == 'rowan': # Use Rowan test case
+                logging.warn('Using Rowan test case, ignore UUIDs in results.')
+                self.SINGLE_VIEWS = 'http://ora.ox.ac.uk/objects/uuid%3A15b86a5d-21f4-44a3-95bb-b8543d326658'
+                self.SINGLE_DOWNS = '%s/datastreams/THESIS01'%self.SINGLE_VIEWS
+            else: # Use custom
+                logging.warn('Using custom test case, ignore UUIDs in results.')
+                self.SINGLE_VIEWS = singles[0]
+                self.SINGLE_DOWNS = singles[1]
+                logging.debug('Views case: %s'%self.SINGLE_VIEWS)
+                logging.debug('Downloads case: %s'%self.SINGLE_DOWNS)
             
         self.URL_ITEMS = ('http://ora.ox.ac.uk/objects/', 'http://ora.ouls.ox.ac.uk/objects/')
         self.URL_ITEM = '/datastreams/%s'%item # count downloads
@@ -155,15 +174,19 @@ class MultipleRequest(object):
         params = self.shared_params()        
         if category == 'downloads':
             params['method']='Actions.getDownload'
-            item = '%s%s%s'%(baseurl, item, self.URL_ITEM )
-            #item = 'http://ora.ox.ac.uk/objects/uuid%3A15b86a5d-21f4-44a3-95bb-b8543d326658/datastreams/THESIS01'
+            if self.SINGLE_DOWNS:
+                item = self.SINGLE_DOWNS
+            else:
+                item = '%s%s%s'%(baseurl, item, self.URL_ITEM ) 
             #params['downloadUrl'] = item   # Don't use this. Since Piwik
             #returns empty. It looks urlencode of "http://" is causing issues.
             urlcat = 'downloadUrl'
         else:
             params['method']='Actions.getPageUrl'
-            item = '%s%s'%(baseurl, item )
-            #item = 'http://ora.ox.ac.uk/objects/uuid%3A15b86a5d-21f4-44a3-95bb-b8543d326658'
+            if self.SINGLE_VIEWS:
+                item = self.SINGLE_VIEWS
+            else:
+                item = '%s%s'%(baseurl, item ) 
             urlcat = 'pageUrl'
         encoded = urllib.urlencode(params)
         if self.URL_SUBDIR: # Piwik install not at root of website.

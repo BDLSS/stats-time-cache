@@ -18,12 +18,12 @@ class Runner(object):
         self.DIV2 = '-'*50
         self.REPORT_SAVE = saveto
         
-    def run_engines(self):
+    def run_engines(self, testitem=[]):
         '''Run all the available engines.'''
         self.save(header=True)
 
         #self.run_engines_single()
-        self.run_engines_multiple()
+        self.run_engines_multiple(testitem)
         
         self.log('%s\nEnd for report.\n%s\n'%(self.DIV1, self.DIV1))
         self.save()
@@ -55,7 +55,7 @@ class Runner(object):
         ms = sources.PiwiEngines()
         return ms.get_sources()
         
-    def run_engines_multiple(self):
+    def run_engines_multiple(self, testitem):
         '''Run engines that need to get data with a multiple requests.'''
         sources = self.multiple_sources()
         autosort = 10
@@ -71,7 +71,7 @@ class Runner(object):
             self.log(self.report_time('Start: '))
             
             multi = engines.MultipleRequest()
-            multi.setup(token, root, subdir, query)
+            multi.setup(token, root, subdir, query, singles=testitem)
             sam = samples.Samples(self.SAMPLE_LIMIT, 1)
             sam.enable(multi.get, 's%s_%s'%(autosort,name))
             sam.runall()
@@ -122,5 +122,5 @@ if __name__ == '__main__':
     
     report = os.path.join(os.getcwd(),'reports','summary_engines.txt') 
     r = Runner(report)
-    r.run_engines()
+    r.run_engines('rowan')
     
