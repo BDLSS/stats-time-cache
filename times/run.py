@@ -111,10 +111,24 @@ class Runner(object):
         
         with file(self.REPORT_SAVE, fmode) as outfile:
             outfile.write(content)
-        
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+
+def command_line():
+    from optparse import OptionParser
+    parser = OptionParser()
+    parser.add_option('-d', help='Enables debug logging', dest='debug',
+                      default=False, action="store_true")
+    parser.add_option('-v', help='Enables info logging', dest='info', 
+                      default=False, action="store_true")
+    (options, unused) = parser.parse_args()
+    if options.debug:
+        logging.basicConfig(level=logging.DEBUG)
+    elif options.info:
+        logging.basicConfig(level=logging.INFO)
+    else:
+        logging.warn('Running engines, showing warnings only.')
     
+if __name__ == '__main__':
+    command_line()    
     e = engines.Engine()
     preload1 = e.get('/results/dv/8b/0b/6cac-e205-41d9-a9f8-f0ca39f6b7eb').read()
     preload2 = e.get('/results/dv/53/2d/3978-9c85-4dc3-a6f7-73b3bd1814f3').read()
