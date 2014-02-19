@@ -19,6 +19,7 @@ class Connection(object):
         self.USER = username
         self.PASSWORD = password
         self.DATABASE = database
+        logging.warn('DB to use: %s on %s with %s'%(database, host, username))
         
     def connect(self):
         '''Start a DB connection, reopening if necessary.'''        
@@ -26,14 +27,14 @@ class Connection(object):
             try:
                 self.CONNECTION = db.connect(host=self.HOST, user=self.USER,
                          passwd=self.PASSWORD, db=self.DATABASE)
-                logging.debug('New connection: %s'%self.HOST)
+                logging.debug('New connection to DB on: %s'%self.HOST)
                 return True
             except db.OperationalError, e: #connection issue.
                 logging.critical('Unable to connect to database')
                 logging.critical('Exception: %s'%e)
                 return False
 
-    def get_cursor(self):
+    def cursor(self):
         '''Return a cursor to the database.'''
         if not self.CONNECTION:
             if not self.connect():
@@ -41,12 +42,14 @@ class Connection(object):
         return self.CONNECTION.cursor()
     
     def fetchall(self, query):
-        cursor = self.get_cursor()
+        logging.debug('Fetch all query: %s'%query)
+        cursor = self.cursor()
         cursor.execute(query)
         return cursor.fetchall()
     
     def fetchone(self, query):
-        cursor = self.get_cursor()
+        logging.debug('Fetch one query: %s'%query)
+        cursor = self.cursor()
         cursor.execute(query)
         return cursor.fetchone()
         
