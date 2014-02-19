@@ -49,10 +49,10 @@ class Connection(object):
 if __name__ == '__main__':
     rw = dbsources.ReadWriteDB()
     rw.setup_source1()
-    host, user, passwd = rw.get_settings()
+    host, user, passwd, database = rw.get_settings()
     
     dbc = Connection()
-    dbc.setup(host, user, passwd, 'pi_customvars')
+    dbc.setup(host, user, passwd, database)
     cursor = dbc.get_cursor()
     if cursor:
         cursor.execute('SELECT VERSION()')
