@@ -33,8 +33,7 @@ class PiwiEngines():
         self.add('pi_customvars', token, ipaddress)
 
     def get_sources(self):
-        self.enable_localvm()
-        self.enable_orastats()
+        self.enable_all()
         return self.SOURCES
         
     def __str__(self):
