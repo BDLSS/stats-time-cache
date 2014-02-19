@@ -44,6 +44,11 @@ class Connection(object):
         cursor = self.get_cursor()
         cursor.execute(query)
         return cursor.fetchall()
+    
+    def fetchone(self, query):
+        cursor = self.get_cursor()
+        cursor.execute(query)
+        return cursor.fetchone()
         
     def close(self):
         '''Close the DB connection if required.'''
