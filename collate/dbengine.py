@@ -39,6 +39,11 @@ class Connection(object):
             if not self.connect():
                 return None
         return self.CONNECTION.cursor()
+    
+    def fetchall(self, query):
+        cursor = self.get_cursor()
+        cursor.execute(query)
+        return cursor.fetchall()
         
     def close(self):
         '''Close the DB connection if required.'''
@@ -53,10 +58,7 @@ if __name__ == '__main__':
     
     dbc = Connection()
     dbc.setup(host, user, passwd, database)
-    cursor = dbc.get_cursor()
-    if cursor:
-        cursor.execute('SELECT VERSION()')
-        print cursor.fetchall()
-        print "(('5.5.35-0ubuntu0.12.04.1',),) = connection okay"
+    print dbc.fetchall('SELECT VERSION()')
+    print "(('5.5.35-0ubuntu0.12.04.1',),) = connection okay"
     dbc.close()
     
