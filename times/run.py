@@ -94,6 +94,10 @@ class Runner(object):
             sam.runall()
             sam.save()
             
+            for sample in sam.SAMPLES: # put samples together
+                content = sam.summary_sample(sample, name)
+                self.REPORT_BY_SAMPLE[sample].append(content)
+            
             self.log(self.report_time('Finish: '))
             self.log('%s\n'%self.DIV2)
             self.log(sam.summary_table())
