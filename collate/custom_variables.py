@@ -17,10 +17,11 @@ class Populate(object):
         source.setup_source1()
         host, username, password, database = source.get_settings()
         self.CONFIG = dbengine.PiwikConfig()
-        self.CONFIG.setup_custom_vars(1) # check count finds stuff
+        #self.CONFIG.setup_custom_vars(1) # check count finds stuff
         self.CONNECTION = dbengine.Connection()
         self.CONNECTION.setup(host, username, password, database)
         
+    # Count existing data
     def sql_count_customvar_scode(self):
         count = self.CONFIG.FIELD_CUSTOM_VARS_SCODE
         table = self.CONFIG.TABLE_CUSTOM_VARS_STORE 
@@ -38,6 +39,15 @@ class Populate(object):
         dcode = self.CONNECTION.fetchone(self.sql_count_customvar_dcode())
         logging.info('Count of custom variable: %s'%dcode)
         return scode, dcode
+    
+    # Lookup custom variables
+    def sql_action_lookup(self, key):
+        return key
+    
+    def action_lookup(self, key):
+        '''Returns data from the key to use as scode and dcode'''
+        query = self.sql_custom_var_lookup(key)
+        return query
             
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
