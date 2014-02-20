@@ -68,6 +68,11 @@ class PiwikConfig(object):
         self.TABLE_CUSTOM_VARS_LOOKUP = actions
         self.FIELD_CUSTOM_VARS_SCODE = self.config_variable(5)
         self.FIELD_CUSTOM_VARS_DCODE = self.config_variable(5, False)
+    
+    def setup_custom_vars(self, number):
+        '''Set the custom variable used to store codes.'''
+        self.FIELD_CUSTOM_VARS_SCODE = self.config_variable(number)
+        self.FIELD_CUSTOM_VARS_DCODE = self.config_variable(number, False)
         
     def config_variable(self, number=5, usevalue=True):
         '''Set custom variable to use the numbered value column.'''
