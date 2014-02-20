@@ -75,6 +75,9 @@ class PiwikConfig(object):
         self.FIELD_ACTION_KEY = 'idaction'
         self.FIELD_ACTION_CONTAINS_CUSTOM_VAR = 'name'
         self.FIELD_ACTION_CONTAINS_DOWNLOAD = 'type'
+        
+        self.ACTION_ISUSEFUL = 1 # what counts as a view
+        self.ACTION_ISDOWNLOAD = 3 # what counts as a download 
     
     def setup_custom_vars(self, number):
         '''Set the custom variable used to store codes.'''
