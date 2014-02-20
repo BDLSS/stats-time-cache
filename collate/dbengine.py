@@ -65,11 +65,16 @@ class PiwikConfig(object):
         links = 'piwik_log_link_visit_action'
         actions = 'piwik_log_action'
         self.TABLE_CUSTOM_VARS_STORE = links 
-        self.TABLE_CUSTOM_VARS_LOOKUP = actions
+        self.TABLE_ACTION_LOOKUP = actions
+        
         default = 5
         self.DEFAULT_CUSTOM_VARS = 5
         self.FIELD_CUSTOM_VARS_SCODE = self.config_variable(default)
         self.FIELD_CUSTOM_VARS_DCODE = self.config_variable(default, False)
+        
+        self.FIELD_ACTION_KEY = 'idaction'
+        self.FIELD_ACTION_CONTAINS_CUSTOM_VAR = 'name'
+        self.FIELD_ACTION_CONTAINS_DOWNLOAD = 'type'
     
     def setup_custom_vars(self, number):
         '''Set the custom variable used to store codes.'''
@@ -84,6 +89,13 @@ class PiwikConfig(object):
         if not usevalue:
             cat = 'k' # but you can use the key column instead.
         return 'custom_var_%s%s'%(cat, number)
+    
+    def get_action_look_config(self):
+        '''Return the settings needed to lookup an action.'''
+        return (self.TABLE_ACTION_LOOKUP,
+                self.FIELD_ACTION_KEY,
+                self.FIELD_ACTION_CONTAINS_CUSTOM_VAR,
+                self.FIELD_ACTION_CONTAINS_DOWNLOAD)
     
 if __name__ == '__main__':
     rw = dbsources.ReadWriteDB()

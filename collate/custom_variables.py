@@ -41,13 +41,14 @@ class Populate(object):
         return scode, dcode
     
     # Lookup custom variables
-    def sql_action_lookup(self, key):
-        return key
+    def sql_action_lookup(self, action):
+        table, key, check, down = self.CONFIG.get_action_look_config()
+        return "SELECT %s , %s , %s FROM %s WHERE %s='%s'"%(key, check, down, table, key, action)
     
-    def action_lookup(self, key):
+    def action_lookup(self, action):
         '''Returns data from the key to use as scode and dcode'''
-        query = self.sql_custom_var_lookup(key)
-        return query
+        query = self.sql_action_lookup(action)
+        return self.CONNECTION.fetchone(query)
             
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
@@ -56,6 +57,14 @@ if __name__ == '__main__':
     logging.critical(count)
     logging.warn('The above should be empty for a new populate.')
     logging.warn('If not you need to CHECK why!!')
+    
+    result = p.action_lookup('50') # test the lookup works
+    if result:
+        if len(result) == 3:
+            logging.info(result)
+        else:
+            logging.warn('Lookup failed.')
+    
     
     
     
