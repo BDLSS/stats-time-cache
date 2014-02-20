@@ -59,6 +59,25 @@ class Connection(object):
             logging.debug('Closing connection')
             self.CONNECTION.close()
 
+class PiwikConfig(object):
+    '''Configuration of tables and fields in Piwik.'''
+    def __init__(self):
+        links = 'piwik_log_link_visit_action'
+        actions = 'piwik_log_action'
+        self.TABLE_CUSTOM_VARS_STORE = links 
+        self.TABLE_CUSTOM_VARS_LOOKUP = actions
+        self.FIELD_CUSTOM_VARS_SCODE = self.config_variable(5)
+        self.FIELD_CUSTOM_VARS_DCODE = self.config_variable(5, False)
+        
+    def config_variable(self, number=5, usevalue=True):
+        '''Set custom variable to use the numbered value column.'''
+        if number not in range (1, 6): # Piwik has upto 5 custom vars
+            number = 5
+        cat = 'v' # we will use the "value column of this custom var"
+        if not usevalue:
+            cat = 'k' # but you can use the key column instead.
+        return 'custom_var_%s%s'%(cat, number)
+    
 if __name__ == '__main__':
     rw = dbsources.ReadWriteDB()
     rw.setup_source1()
@@ -70,3 +89,9 @@ if __name__ == '__main__':
     print "(('5.5.35-0ubuntu0.12.04.1',),) = connection okay"
     dbc.close()
     
+    config = PiwikConfig()
+    ats = dir(config)        
+    for item in sorted(ats):
+        if not str(item).startswith('_'):
+            print item, '=', getattr(config, item)
+            
