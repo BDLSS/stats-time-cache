@@ -66,8 +66,10 @@ class PiwikConfig(object):
         actions = 'piwik_log_action'
         self.TABLE_CUSTOM_VARS_STORE = links 
         self.TABLE_CUSTOM_VARS_LOOKUP = actions
-        self.FIELD_CUSTOM_VARS_SCODE = self.config_variable(5)
-        self.FIELD_CUSTOM_VARS_DCODE = self.config_variable(5, False)
+        default = 5
+        self.DEFAULT_CUSTOM_VARS = 5
+        self.FIELD_CUSTOM_VARS_SCODE = self.config_variable(default)
+        self.FIELD_CUSTOM_VARS_DCODE = self.config_variable(default, False)
     
     def setup_custom_vars(self, number):
         '''Set the custom variable used to store codes.'''
@@ -77,7 +79,7 @@ class PiwikConfig(object):
     def config_variable(self, number=5, usevalue=True):
         '''Set custom variable to use the numbered value column.'''
         if number not in range (1, 6): # Piwik has upto 5 custom vars
-            number = 5
+            number = self.DEFAULT_CUSTOM_VARS
         cat = 'v' # we will use the "value column of this custom var"
         if not usevalue:
             cat = 'k' # but you can use the key column instead.
