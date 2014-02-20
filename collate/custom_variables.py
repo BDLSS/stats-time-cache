@@ -17,26 +17,35 @@ class Populate(object):
         source.setup_source1()
         host, username, password, database = source.get_settings()
         self.CONFIG = dbengine.PiwikConfig()
+        self.CONFIG.setup_custom_vars(1) # check count finds stuff
         self.CONNECTION = dbengine.Connection()
         self.CONNECTION.setup(host, username, password, database)
         
-    def sql_count_customvar(self):
+    def sql_count_customvar_scode(self):
         count = self.CONFIG.FIELD_CUSTOM_VARS_SCODE
+        table = self.CONFIG.TABLE_CUSTOM_VARS_STORE 
+        return "SELECT COUNT(%s) FROM %s"%(count, table)
+    
+    def sql_count_customvar_dcode(self):
+        count = self.CONFIG.FIELD_CUSTOM_VARS_DCODE
         table = self.CONFIG.TABLE_CUSTOM_VARS_STORE 
         return "SELECT COUNT(%s) FROM %s"%(count, table)
     
     def count_existing(self):
         '''Return the number of custom variables that exist.'''
-        answer = self.CONNECTION.fetchone(self.sql_count_customvar())
-        logging.info('Count of custom variable: %s'%answer)
-        return answer
+        scode = self.CONNECTION.fetchone(self.sql_count_customvar_scode())
+        logging.info('Count of custom variable: %s'%scode)
+        dcode = self.CONNECTION.fetchone(self.sql_count_customvar_dcode())
+        logging.info('Count of custom variable: %s'%dcode)
+        return scode, dcode
             
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     p = Populate()
-    existing = p.count_existing()
-    if existing:
-        logging.critical('Data EXISTS in custom variables to populate.')
-        logging.warn('If this is a new populate you need to check WHY.')
-        
+    count = p.count_existing()
+    logging.critical(count)
+    logging.warn('The above should be empty for a new populate.')
+    logging.warn('If not you need to CHECK why!!')
+    
+    
     
