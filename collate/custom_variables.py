@@ -1,5 +1,6 @@
 '''A collection of tasks to perform related to Piwik custom variables.'''
 import logging
+import re
 
 import dbsources
 import dbengine
@@ -10,6 +11,8 @@ class Populate(object):
         self.CONFIG = None # tables and fields to use
         self.CONNECTION = None # in this location
         self.setup()
+        regexp = '(.*)([0-F]{8}-[0-F]{4}-[0-F]{4}-[0-F]{4}-[0-F]{12})(.*)'
+        self.PATTERN_CHECK = re.compile(regexp, re.IGNORECASE)
         
     def setup(self):
         '''Setup the connection to the system being populated.'''
@@ -49,6 +52,32 @@ class Populate(object):
         '''Returns data from the key to use as scode and dcode'''
         query = self.sql_action_lookup(action)
         return self.CONNECTION.fetchone(query)
+        
+    def get_action(self, action):
+        '''Return details about an action.'''
+        result = self.action_lookup(action)
+        if not result:
+            return False
+        
+        code = self.action_extract_code(result[1])
+        if not code:
+            return False
+        
+        checktype = result[2]
+        if checktype == self.CONFIG.ACTION_ISUSEFUL:
+            return code, 'view'
+        elif checktype == self.CONFIG.ACTION_ISDOWNLOAD:
+            return code, 'down'
+        else:
+            return code, 'ignore'  
+        
+    def action_extract_code(self, checkname):
+        found = re.search(self.PATTERN_CHECK, checkname)
+        if found:
+            code = 'uuid:%s'%str(found.group(2)).lower()
+            return code
+        else:
+            return False
             
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
@@ -65,6 +94,9 @@ if __name__ == '__main__':
         else:
             logging.warn('Lookup failed.')
     
-    
+    print 'Expect to see    uuid:15b86a5d-21f4-44a3-95bb-b8543d326658'
+    print p.get_action('33162') #type 4
+    print p.get_action('33257') #view
+    print p.get_action('33258') #down
     
     
