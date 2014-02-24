@@ -100,9 +100,9 @@ class PiwikConfig(object):
         '''Set custom variable to use the numbered value column.'''
         if number not in range (1, 6): # Piwik has upto 5 custom vars
             number = self.DEFAULT_CUSTOM_VARS
-        cat = 'v' # we will use the "value column of this custom var"
+        cat = 'k' # we will use the key column of this custom var"
         if not usevalue:
-            cat = 'k' # but you can use the key column instead.
+            cat = 'v' # but you can use the value column instead.
         return 'custom_var_%s%s'%(cat, number)
     
     def get_action_look_config(self):
