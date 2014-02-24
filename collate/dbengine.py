@@ -126,6 +126,12 @@ class PiwikConfig(object):
     def get_update_store_config(self):
         return (self.TABLE_CUSTOM_VARS_STORE, self.FIELD_STORE_KEY)
     
+    def sql_alter_table(self):
+        '''Return the two SQL statements required for indexed custom vars.'''
+        scode = "ALTER TABLE %s ADD INDEX ( %s ) ;"%(self.TABLE_CUSTOM_VARS_STORE, self.FIELD_CUSTOM_VARS_SCODE)
+        dcode = "ALTER TABLE %s ADD INDEX ( %s ) ;"%(self.TABLE_CUSTOM_VARS_STORE, self.FIELD_CUSTOM_VARS_DCODE)
+        return scode, dcode
+    
 if __name__ == '__main__':
     rw = dbsources.ReadWriteDB()
     rw.setup_source1()
