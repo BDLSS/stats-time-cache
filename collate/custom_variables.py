@@ -18,6 +18,10 @@ class Populate(object):
         self.DCODE_IGNORE = 'n' # value to insert when we are not interested
         self.DCODE_VIEW = 'v' # value to insert when it is a view
         
+        # Control how the WHERE clause will be generated.
+        self.FIND_WHERE_METHOD = self.where_test
+        self.FIND_BATCH_SIZE = 5
+        
     def setup(self):
         '''Setup the connection to the system being populated.'''
         source = dbsources.ReadWriteDB()
@@ -84,17 +88,27 @@ class Populate(object):
             return False
             
     # Find data that needs checking to see if custom variables are needed.
-    def sql_find_items(self, how='test'):
+    def sql_find_items(self):
         table, key, action, site, when, visit, scode, dcode = self.CONFIG.get_store_look_config()
         select = 'SELECT %s , %s , %s , %s , %s , %s , %s FROM %s'%(key,
-                        action, site, when, visit, scode, dcode, table) 
-        where = ''
-        if how == 'test': 
-            where = self.where_test()
-        return '%s%s'%(select, where)
+                        action, site, when, visit, scode, dcode, table)  
+        return '%s%s'%(select, self.FIND_WHERE_METHOD())
     
+    def setup_where(self, cat='test'):
+        '''Setup the where clause to use when finding items to update.'''
+        if cat not in ['test','notdone']:
+            raise ValueError
+        if cat == 'test':
+            self.FIND_WHERE_METHOD = self.where_test
+        elif cat == 'notdone':
+            self.FIND_WHERE_METHOD = self.where_notdone
+        
     def where_test(self):
-        return ' LIMIT 0, 10'
+        return ' LIMIT 0, 5'
+    
+    def where_notdone(self):
+        return " WHERE %s IS NULL LIMIT 0, %s"%(
+            self.CONFIG.FIELD_CUSTOM_VARS_DCODE, self.FIND_BATCH_SIZE)
      
     def find_items_to_populate(self, how='test'):
         query = self.sql_find_items()
@@ -189,6 +203,7 @@ if __name__ == '__main__':
     print p.get_action('33257') #view
     print p.get_action('33258') #down
     
-    print p.find_items_to_populate()
+    print p.find_items_to_populate() 
+    p.setup_where('notdone') 
     print p.run_populate()
     
