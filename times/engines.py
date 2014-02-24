@@ -54,7 +54,7 @@ class SingleRequest(object):
         '''Start the engine so it is ready for setup.'''
         self.URL_ROOT = None
         self.URL_SOURCE = None # This will point to a method for calling
-        self.SOURCES = ['or-static', 'or-vdown', 'or-indexed']
+        self.SOURCES = ['or-static', 'or-vdown', 'or-indexed', 'or-months']
         self.ENGINE = Engine()
         
         # This code will be used for all get requests if enabled.
@@ -84,6 +84,8 @@ class SingleRequest(object):
             self.URL_SOURCE = self.url_vdown
         elif source == 'or-indexed':
             self.URL_SOURCE = self.url_indexed
+        elif source == 'or-months':
+            self.URL_SOURCE = self.url_months
         
     def url_static(self, item):
         '''Return the URL pattern for fetching data.'''
@@ -106,6 +108,11 @@ class SingleRequest(object):
             item = self.SINGLE_SCODE
         return '/results/vdown_act.php?scode=%s'%item
         
+    def url_months(self, item):
+        if self.SINGLE_SCODE: # always use the same item
+            item = self.SINGLE_SCODE
+        return '/results/yearmonth.php?yeartype=ac&scode=%s'%item
+        
     def get(self, scode):
         '''Get results for scode timing how long it takes.'''
         address = self.URL_SOURCE(scode)
@@ -125,6 +132,9 @@ class SingleRequest(object):
     
     def extract(self, content):
         '''Check the content for the information expected.'''
+        if self.URL_SOURCE == self.url_months:
+            count = len(content)
+            return '%s;%s'%(count, count)
         if not content:
             return 'e0;e0'
         if len(content) > 20:
