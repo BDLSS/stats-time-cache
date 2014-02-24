@@ -19,8 +19,8 @@ class Populate(object):
         self.DCODE_VIEW = 'v' # value to insert when it is a view
         
         # Control how the WHERE clause will be generated.
-        self.FIND_WHERE_METHOD = self.where_test
-        self.FIND_BATCH_SIZE = 5
+        self.FIND_WHERE_METHOD = self.where_notdone
+        self.FIND_BATCH_SIZE = 10000 # takes < 1 minute
         
     def setup(self):
         '''Setup the connection to the system being populated.'''
@@ -184,26 +184,38 @@ class Populate(object):
         return views, downloads, others
             
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    p = Populate()
-    count = p.count_existing()
-    logging.critical(count)
-    logging.warn('The above should be empty for a new populate.')
-    logging.warn('If not you need to CHECK why!!')
-    
-    result = p.action_lookup('50') # test the lookup works
-    if result:
-        if len(result) == 3:
-            logging.info(result)
-        else:
-            logging.warn('Lookup failed.')
-    
-    print 'Expect to see    uuid:15b86a5d-21f4-44a3-95bb-b8543d326658'
-    print p.get_action('33162') #type 4
-    print p.get_action('33257') #view
-    print p.get_action('33258') #down
-    
-    print p.find_items_to_populate() 
-    p.setup_where('notdone') 
-    print p.run_populate()
+    '''Do nothing unless enabled.'''
+    testing = False
+    process = False
+    if process:
+        p = Populate()
+        p.FIND_BATCH_SIZE = 10000000 # override the default
+        p.run_populate()   
+    if testing:
+        logging.basicConfig(level=logging.INFO)
+        p = Populate()
+        count = p.count_existing()
+        logging.critical(count)
+        logging.warn('The above should be empty for a new populate.')
+        logging.warn('If not you need to CHECK why!!')
+        
+        result = p.action_lookup('50') # test the lookup works
+        if result:
+            if len(result) == 3:
+                logging.info(result)
+            else:
+                logging.warn('Lookup failed.')
+        
+        print 'Expect to see    uuid:15b86a5d-21f4-44a3-95bb-b8543d326658'
+        print p.get_action('33162') #type 4
+        print p.get_action('33257') #view
+        print p.get_action('33258') #down
+         
+        p.setup_where('notdone') 
+        p.FIND_BATCH_SIZE = 50 # override the default
+        views, downloads, ignores = p.run_populate()
+        print 'View: %s'%views
+        print 'Downloads: %s'%downloads
+        print 'Ignores: %s'%ignores
+        
     
