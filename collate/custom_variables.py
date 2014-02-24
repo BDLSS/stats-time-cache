@@ -14,6 +14,10 @@ class Populate(object):
         regexp = '(.*)([0-F]{8}-[0-F]{4}-[0-F]{4}-[0-F]{4}-[0-F]{12})(.*)'
         self.PATTERN_CHECK = re.compile(regexp, re.IGNORECASE)
         
+        # These two codes indicate what type of update has occurred
+        self.DCODE_IGNORE = 'n' # value to insert when we are not interested
+        self.DCODE_VIEW = 'v' # value to insert when it is a view
+        
     def setup(self):
         '''Setup the connection to the system being populated.'''
         source = dbsources.ReadWriteDB()
@@ -69,7 +73,7 @@ class Populate(object):
         elif checktype == self.CONFIG.ACTION_ISDOWNLOAD:
             return code, 'down'
         else:
-            return code, 'ignore'  
+            return code, 'other'  
         
     def action_extract_code(self, checkname):
         found = re.search(self.PATTERN_CHECK, checkname)
@@ -90,12 +94,80 @@ class Populate(object):
         return '%s%s'%(select, where)
     
     def where_test(self):
-        return ' LIMIT 0, 5'
+        return ' LIMIT 0, 10'
      
     def find_items_to_populate(self, how='test'):
         query = self.sql_find_items()
         return self.CONNECTION.fetchall(query)
 
+    # Update the store if necessary.
+    def sql_update(self, key, scode, dcode):
+        table,  fieldkey = self.CONFIG.get_update_store_config()
+        update = "UPDATE %s SET "%table
+        scode = "%s = '%s' , "%(self.CONFIG.FIELD_CUSTOM_VARS_SCODE, scode)
+        dcode = "%s = '%s' "%(self.CONFIG.FIELD_CUSTOM_VARS_DCODE, dcode)
+        where = "WHERE %s = %s"%(fieldkey, key)
+        return '%s%s%s%s'%(update, scode, dcode, where)
+    
+    def update_codes(self, key, scode, dcode):
+        '''Execute the update of key with scode and dcode.'''
+        query = self.sql_update(key, scode, dcode)
+        return self.CONNECTION.update(query)
+        
+    def run_populate(self):
+        '''Check the store and update any custom variables needed.'''
+        views = 0
+        downloads = 0
+        others = 0
+        for item in self.find_items_to_populate():
+            key = item[0]
+            action = item[1]
+            existing_scode = item[5]
+            existing_dcode = item[6]
+            
+            # dcode controls if this item is updated.
+            if existing_dcode == self.DCODE_IGNORE or existing_dcode == self.DCODE_VIEW:
+                continue
+
+            # It needs updating, find out what type of update is needed
+            # and work out the scodes and dcodes to use.
+            useful = self.get_action(action)
+            if not useful: # we can ignore it,
+                others += 1
+                scode = self.DCODE_IGNORE
+                dcode = self.DCODE_IGNORE
+            else:  # its either a view or download
+                new_code = useful[0]
+                category = useful[1]
+                
+                if category == 'view':
+                    views += 1
+                    if existing_scode:
+                        scode = existing_scode 
+                    else:
+                        scode = new_code
+                    dcode = self.DCODE_VIEW
+                
+                if category == 'down':
+                    downloads += 1
+                    if existing_dcode:
+                        dcode = existing_dcode
+                    else:
+                        dcode = new_code
+                        
+                    # Deal with data where the dcode needs changing from known values
+                    if dcode == self.DCODE_IGNORE or dcode == self.DCODE_VIEW:
+                        dcode = new_code
+                        
+                    # Deal with archived data that starts off with no scode,
+                    if existing_scode:
+                        scode = existing_scode
+                    else:
+                        scode = new_code
+                          
+            self.update_codes(key, scode, dcode)
+            
+        return views, downloads, others
             
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
@@ -118,3 +190,5 @@ if __name__ == '__main__':
     print p.get_action('33258') #down
     
     print p.find_items_to_populate()
+    print p.run_populate()
+    
