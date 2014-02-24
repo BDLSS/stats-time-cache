@@ -211,8 +211,7 @@ if __name__ == '__main__':
         print p.get_action('33257') #view
         print p.get_action('33258') #down
          
-        p.setup_where('notdone') 
-        p.FIND_BATCH_SIZE = 50 # override the default
+        p.setup_where('test') 
         views, downloads, ignores = p.run_populate()
         print 'View: %s'%views
         print 'Downloads: %s'%downloads
