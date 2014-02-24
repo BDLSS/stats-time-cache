@@ -77,7 +77,13 @@ class PiwikConfig(object):
         self.FIELD_ACTION_CONTAINS_DOWNLOAD = 'type'
         
         self.ACTION_ISUSEFUL = 1 # what counts as a view
-        self.ACTION_ISDOWNLOAD = 3 # what counts as a download 
+        self.ACTION_ISDOWNLOAD = 3 # what counts as a download
+        
+        self.FIELD_STORE_KEY = 'idlink_va'
+        self.FIELD_STORE_ACTION = '%s_url'%self.FIELD_ACTION_KEY
+        self.FIELD_STORE_SITE = 'idsite'
+        self.FIELD_STORE_TIME = 'server_time'
+        self.FIELD_STORE_VISIT = 'idvisit'
     
     def setup_custom_vars(self, number):
         '''Set the custom variable used to store codes.'''
@@ -99,6 +105,20 @@ class PiwikConfig(object):
                 self.FIELD_ACTION_KEY,
                 self.FIELD_ACTION_CONTAINS_CUSTOM_VAR,
                 self.FIELD_ACTION_CONTAINS_DOWNLOAD)
+        
+    def get_store_look_config(self):
+        return (self.TABLE_CUSTOM_VARS_STORE,
+                self.FIELD_STORE_KEY,
+                self.FIELD_STORE_ACTION,
+                self.FIELD_STORE_SITE,
+                self.FIELD_STORE_TIME,
+                self.FIELD_STORE_VISIT,
+                self.FIELD_CUSTOM_VARS_SCODE,
+                self.FIELD_CUSTOM_VARS_DCODE,
+                )
+    
+    def get_update_store_config(self):
+        return (self.TABLE_CUSTOM_VARS_STORE, self.FIELD_STORE_KEY)
     
 if __name__ == '__main__':
     rw = dbsources.ReadWriteDB()

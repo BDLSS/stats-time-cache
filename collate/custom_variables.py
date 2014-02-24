@@ -79,6 +79,24 @@ class Populate(object):
         else:
             return False
             
+    # Find data that needs checking to see if custom variables are needed.
+    def sql_find_items(self, how='test'):
+        table, key, action, site, when, visit, scode, dcode = self.CONFIG.get_store_look_config()
+        select = 'SELECT %s , %s , %s , %s , %s , %s , %s FROM %s'%(key,
+                        action, site, when, visit, scode, dcode, table) 
+        where = ''
+        if how == 'test': 
+            where = self.where_test()
+        return '%s%s'%(select, where)
+    
+    def where_test(self):
+        return ' LIMIT 0, 5'
+     
+    def find_items_to_populate(self, how='test'):
+        query = self.sql_find_items()
+        return self.CONNECTION.fetchall(query)
+
+            
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     p = Populate()
@@ -99,4 +117,4 @@ if __name__ == '__main__':
     print p.get_action('33257') #view
     print p.get_action('33258') #down
     
-    
+    print p.find_items_to_populate()
