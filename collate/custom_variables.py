@@ -17,6 +17,7 @@ class Populate(object):
         # These two codes indicate what type of update has occurred
         self.DCODE_IGNORE = 'n' # value to insert when we are not interested
         self.DCODE_VIEW = 'v' # value to insert when it is a view
+        self.DCODE_DOWN = 'd' # value to insert when a download
         
         # Control how the WHERE clause will be generated.
         self.FIND_WHERE_METHOD = self.where_notdone
@@ -77,7 +78,7 @@ class Populate(object):
         elif checktype == self.CONFIG.ACTION_ISDOWNLOAD:
             return code, 'down'
         else:
-            return code, 'other'  
+            return code, 'none'  
         
     def action_extract_code(self, checkname):
         found = re.search(self.PATTERN_CHECK, checkname)
@@ -140,7 +141,8 @@ class Populate(object):
             existing_dcode = item[6]
             
             # dcode controls if this item is updated.
-            if existing_dcode == self.DCODE_IGNORE or existing_dcode == self.DCODE_VIEW:
+            check = (self.DCODE_IGNORE, self.DCODE_VIEW, self.DCODE_DOWN)
+            if existing_dcode in check: 
                 continue
 
             # It needs updating, find out what type of update is needed
@@ -164,14 +166,7 @@ class Populate(object):
                 
                 if category == 'down':
                     downloads += 1
-                    if existing_dcode:
-                        dcode = existing_dcode
-                    else:
-                        dcode = new_code
-                        
-                    # Deal with data where the dcode needs changing from known values
-                    if dcode == self.DCODE_IGNORE or dcode == self.DCODE_VIEW:
-                        dcode = new_code
+                    dcode = self.DCODE_DOWN
                         
                     # Deal with archived data that starts off with no scode,
                     if existing_scode:
@@ -211,7 +206,7 @@ if __name__ == '__main__':
         print p.get_action('33257') #view
         print p.get_action('33258') #down
          
-        p.setup_where('test') 
+        p.setup_where('test')
         views, downloads, ignores = p.run_populate()
         print 'View: %s'%views
         print 'Downloads: %s'%downloads
