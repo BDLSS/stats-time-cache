@@ -123,7 +123,7 @@ sudo -u www-data php $webpath/index.php -- "module=CoreUpdater"
 echo "You should now edit the general settings in Piwik and install version >2.0.4-b7"
 echo "When you get the prompt to update you DB stucture use the link provided since"
 echo "it is usually a minor upgrade that is quick to run."
-#read -p "When ready, press enter to run DB update."
+read -p "When ready, press enter to finish the Piwik update."
 #sudo -u www-data php $webpath/index.php -- "module=CoreUpdater"
 
 
