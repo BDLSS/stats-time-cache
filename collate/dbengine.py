@@ -52,6 +52,12 @@ class Connection(object):
         cursor = self.cursor()
         cursor.execute(query)
         return cursor.fetchone()
+    
+    def update(self, query):
+        logging.debug('Update query: %s'%query)
+        cursor = self.cursor()
+        cursor.execute(query)
+        self.CONNECTION.commit()
         
     def close(self):
         '''Close the DB connection if required.'''
