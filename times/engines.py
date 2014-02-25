@@ -86,6 +86,8 @@ class SingleRequest(object):
             self.URL_SOURCE = self.url_indexed
         elif source == 'or-months':
             self.URL_SOURCE = self.url_months
+        elif source == 'results-get':
+            self.URL_SOURCE = self.url_resultsget
         
     def url_static(self, item):
         '''Return the URL pattern for fetching data.'''
@@ -113,6 +115,11 @@ class SingleRequest(object):
             item = self.SINGLE_SCODE
         return '/results/yearmonth.php?yeartype=ac&scode=%s'%item
         
+    def url_resultsget(self, item):
+        if self.SINGLE_SCODE: # always use the same item
+            item = self.SINGLE_SCODE
+        return '/results/get.php?scode=%s'%item
+
     def get(self, scode):
         '''Get results for scode timing how long it takes.'''
         address = self.URL_SOURCE(scode)
