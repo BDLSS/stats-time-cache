@@ -10,7 +10,7 @@ class PiwiEngines():
             subdir = ''
         elif not subdir: # assume subdir matches name
             subdir = name
-        if query not in ['last5years', 'last12months']:
+        if query not in ['last5years', 'last12months', 'ac1year']:
             query = 'last5years'
         source = (name, token, ipaddress, subdir, query)
         self.SOURCES.append(source)
@@ -27,10 +27,12 @@ class PiwiEngines():
     def enable_localvm(self):
         ipaddress = 'THE IP'
         token = 'YOUR TOKEN'
-        self.add('pi_noarchives', token, ipaddress) 
+        self.add('pi_noarchives', token, ipaddress)
         self.add('pi_archives', token, ipaddress)
         self.add('pi_bigarchives', token, ipaddress)
-        self.add('pi_customvars', token, ipaddress)
+        self.add('pi_indexed', token, ipaddress)
+        self.add('pi_indexed', token, ipaddress, query='last12months')
+        self.add('pi_indexed', token, ipaddress, query='ac1year')
 
     def get_sources(self):
         self.enable_all()
