@@ -76,8 +76,6 @@ class SingleRequest(object):
                 self.SINGLE_SCODE = singlecode
                 logging.debug('Test case: %s'%singlecode)
         
-        if source not in self.SOURCES:
-            raise ValueError
         if source == 'or-static':
             self.URL_SOURCE = self.url_static
         elif source == 'or-vdown':
@@ -88,6 +86,8 @@ class SingleRequest(object):
             self.URL_SOURCE = self.url_months
         elif source == 'results-get':
             self.URL_SOURCE = self.url_resultsget
+        else:
+            raise ValueError
         
     def url_static(self, item):
         '''Return the URL pattern for fetching data.'''
