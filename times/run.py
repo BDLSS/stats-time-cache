@@ -83,6 +83,7 @@ class Runner(object):
             root = source[2]
             subdir = source[3]
             query = source[4]
+            label = '%s_%s'%(name, query)
             
             logging.info('Running engine: %s'%name) 
             self.log('\n%s\n%s\n'%(name, self.DIV2))
@@ -91,12 +92,13 @@ class Runner(object):
             multi = engines.MultipleRequest()
             multi.setup(token, root, subdir, query=query, singles=testitem)
             sam = samples.Samples(self.SAMPLE_LIMIT, 1)
-            sam.enable(multi.get, 's%s_%s'%(autosort,name))
+            
+            sam.enable(multi.get, 's%s_%s'%(autosort, label))
             sam.runall()
             sam.save()
             
             for sample in sam.SAMPLES: # put samples together
-                content = sam.summary_sample(sample, name)
+                content = sam.summary_sample(sample, label)
                 self.REPORT_BY_SAMPLE[sample].append(content)
             
             self.log(self.report_time('Finish: '))
