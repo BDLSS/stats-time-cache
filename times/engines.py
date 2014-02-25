@@ -86,6 +86,8 @@ class SingleRequest(object):
             self.URL_SOURCE = self.url_months
         elif source == 'results-get':
             self.URL_SOURCE = self.url_resultsget
+        elif source == 'results-group':
+            self.URL_SOURCE = self.url_resultsget
         else:
             raise ValueError
         
@@ -119,6 +121,11 @@ class SingleRequest(object):
         if self.SINGLE_SCODE: # always use the same item
             item = self.SINGLE_SCODE
         return '/results/get.php?scode=%s'%item
+    
+    def url_resultsgroup(self, item):
+        if self.SINGLE_SCODE: # always use the same item
+            item = self.SINGLE_SCODE
+        return '/results/getgrby.php?scode=%s'%item
 
     def get(self, scode):
         '''Get results for scode timing how long it takes.'''
