@@ -282,7 +282,13 @@ class MultipleRequest(object):
                 logging.warn('Request issue: %s'%scode)
             return total
     
-        for point  in dpoints:
+        if self.QUERY_PERIOD == 'range':
+            try:
+                return dpoints[0][field]
+            except (IndexError, KeyError):
+                return 0
+        
+        for point in dpoints:
             try:
                 for period in dpoints[point]:
                     total += period[field]
