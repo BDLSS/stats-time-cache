@@ -30,6 +30,7 @@ class Runner(object):
         del(sam)
         
         self.run_engines_single(testitem)
+        self.single_resultget(testitem)
         self.run_engines_multiple(testitem)
         self.final_result()
     
@@ -66,7 +67,21 @@ class Runner(object):
             self.save()
             self.RESULT = list()
             time.sleep(self.PAUSE_BETWEEN)
-        
+            
+    def single_resultget(self, testitem):
+        '''Do a single customised test using results-get'''
+        source = 'results-get'
+        host = "HOST"
+        singles = engines.SingleRequest()
+        singles.setup(source, host, testitem)
+        sam = samples.Samples(self.SAMPLE_LIMIT, 1)
+        sam.enable(singles.get, source)
+        sam.runall()
+        sam.save()
+        for sample in sam.SAMPLES: # put samples together
+            content = sam.summary_sample(sample, source)
+            self.REPORT_BY_SAMPLE[sample].append(content)
+    
     def multiple_sources(self):
         '''Return a tuple of of which multiple sources to test.'''
         ms = sources.PiwiEngines()
