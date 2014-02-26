@@ -87,7 +87,7 @@ class SingleRequest(object):
         elif source == 'results-get':
             self.URL_SOURCE = self.url_resultsget
         elif source == 'results-group':
-            self.URL_SOURCE = self.url_resultsget
+            self.URL_SOURCE = self.url_resultsgroup
         else:
             raise ValueError
         
