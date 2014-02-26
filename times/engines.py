@@ -196,6 +196,7 @@ class MultipleRequest(object):
             self.QUERY_PERIOD = 'range'
             self.QUERY_DATE = '2012-08-01,2013-07-31'
         if query == 'last24months':
+            logging.critical('Remember, last24months query does not work for downloads.')
             self.QUERY_PERIOD = 'month'
             self.QUERY_DATE = 'last24'
         
