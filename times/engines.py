@@ -54,7 +54,7 @@ class SingleRequest(object):
         '''Start the engine so it is ready for setup.'''
         self.URL_ROOT = None
         self.URL_SOURCE = None # This will point to a method for calling
-        self.SOURCES = ['or-static', 'or-vdown', 'or-indexed', 'or-months']
+        self.SOURCES = ['or-static', 'or-vdown', 'or-indexed', 'or-months', 'or-yearmonth']
         self.ENGINE = Engine()
         
         # This code will be used for all get requests if enabled.
@@ -88,6 +88,8 @@ class SingleRequest(object):
             self.URL_SOURCE = self.url_resultsget
         elif source == 'results-group':
             self.URL_SOURCE = self.url_resultsgroup
+        elif source == 'or-yearmonth':
+            self.URL_SOURCE = self.url_allmonths
         else:
             raise ValueError
         
@@ -127,6 +129,11 @@ class SingleRequest(object):
             item = self.SINGLE_SCODE
         return '/results/getgrby.php?scode=%s'%item
 
+    def url_allmonths(self, item):
+        if self.SINGLE_SCODE: # always use the same item
+            item = self.SINGLE_SCODE
+        return 'results/yearmonth.php?yeartype=ac&scode=%s'%item
+    
     def get(self, scode):
         '''Get results for scode timing how long it takes.'''
         address = self.URL_SOURCE(scode)
