@@ -195,10 +195,9 @@ class MultipleRequest(object):
         if query == 'ac1year':
             self.QUERY_PERIOD = 'range'
             self.QUERY_DATE = '2012-08-01,2013-07-31'
-        if query == 'last24months':
-            logging.critical('Remember, last24months query does not work for downloads.')
+        if query == '24months':
             self.QUERY_PERIOD = 'month'
-            self.QUERY_DATE = 'last24'
+            self.QUERY_DATE = '2011-08-01,2013-07-31'
         
         if singles: # Get request will always use these.
             if singles == 'rowan': # Use Rowan test case
