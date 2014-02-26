@@ -10,8 +10,8 @@ class PiwiEngines():
             subdir = ''
         elif not subdir: # assume subdir matches name
             subdir = name
-        if query not in ['last5years', 'last12months', 'ac1year']:
-            query = 'last5years'
+        if query not in ['last5years', 'last12months', 'ac1year','24months']:
+            raise ValueError
         source = (name, token, ipaddress, subdir, query)
         self.SOURCES.append(source)
 
@@ -33,6 +33,7 @@ class PiwiEngines():
         self.add('pi_indexed', token, ipaddress)
         self.add('pi_indexed', token, ipaddress, query='last12months')
         self.add('pi_indexed', token, ipaddress, query='ac1year')
+        self.add('pi_indexed', token, ipaddress, query='24months')
 
     def get_sources(self):
         self.enable_all()
