@@ -195,6 +195,9 @@ class MultipleRequest(object):
         if query == 'ac1year':
             self.QUERY_PERIOD = 'range'
             self.QUERY_DATE = '2012-08-01,2013-07-31'
+        if query == 'last24months':
+            self.QUERY_PERIOD = 'month'
+            self.QUERY_DATE = 'last24'
         
         if singles: # Get request will always use these.
             if singles == 'rowan': # Use Rowan test case
