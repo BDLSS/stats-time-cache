@@ -105,7 +105,7 @@ class Runner(object):
             query = source[4]
             label = '%s_%s'%(name, query)
             
-            logging.info('Running engine: %s'%name) 
+            logging.info('Running engine: %s'%label) 
             self.log('\n%s\n%s\n'%(name, self.DIV2))
             self.log(self.report_time('Start: '))
             
